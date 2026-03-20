@@ -1,0 +1,9 @@
+node_modules/
+logs/*.log
+config/settings.json
+.env
+*.pid
+.DS_Store
+Thumbs.db
+.claude/
+deploy.ps1

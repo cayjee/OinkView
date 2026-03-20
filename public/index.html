@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OinkView — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { fontFamily: { mono: ['JetBrains Mono','Fira Code','monospace'] } } }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    .log-alert  { color: #f87171; }
+    .log-drop   { color: #fb923c; }
+    .log-info   { color: #94a3b8; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+    .pulse-dot  { animation: pulse-dot 1.5s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-screen flex overflow-hidden">
+
+  <!-- Sidebar -->
+  <nav class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-5 py-5 border-b border-gray-800">
+      <span class="text-orange-400 font-semibold text-lg tracking-wide">🐗 OinkView</span>
+      <p class="text-xs text-gray-500 mt-0.5">Snort 3 Manager</p>
+    </div>
+    <ul class="flex-1 py-4 space-y-1 px-2">
+      <li>
+        <a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="overview.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+          Vue Globale
+        </a>
+      </li>
+      <li>
+        <a href="rules.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Règles
+        </a>
+      </li>
+      <li>
+        <a href="stats.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          Statistiques
+        </a>
+      </li>
+      <li>
+        <a href="settings.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Paramètres
+        </a>
+      </li>
+    </ul>
+    <div class="p-3 border-t border-gray-800">
+      <button id="btnReload" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reload Snort
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900 shrink-0">
+      <div>
+        <h1 class="text-lg font-semibold text-gray-100">Console d'Alertes</h1>
+        <p class="text-xs text-gray-500 mt-0.5">Flux temps réel — fichier log Snort</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 text-xs text-gray-400">
+          <span id="liveIndicator" class="w-2 h-2 rounded-full bg-gray-600 pulse-dot"></span>
+          <span id="liveStatus">Connexion…</span>
+        </div>
+        <div class="flex gap-2">
+          <span class="px-2 py-1 rounded-md bg-red-900/40 text-red-300 text-xs" id="cntAlert">0 alert</span>
+          <span class="px-2 py-1 rounded-md bg-orange-900/40 text-orange-300 text-xs" id="cntDrop">0 drop</span>
+        </div>
+        <button id="btnClear" class="px-3 py-1 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Vider console</button>
+        <button id="btnResetAll" class="px-3 py-1 rounded-md bg-red-900/60 hover:bg-red-800 text-red-300 text-xs transition-colors font-medium">Reinitialiser tout</button>
+        <button id="btnExportTxt" class="px-3 py-1 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Export TXT</button>
+        <button id="btnExportCsv" class="px-3 py-1 rounded-md bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Export CSV</button>
+        <label class="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer select-none">
+          <input type="checkbox" id="chkAutoscroll" checked class="accent-orange-500"/> Autoscroll
+        </label>
+        <button id="btnToggleStats" class="px-3 py-1 rounded-md bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs transition-colors">◀ Stats</button>
+      </div>
+    </header>
+
+    <!-- Filtres -->
+    <div class="px-6 py-2.5 border-b border-gray-800 bg-gray-900/60 flex flex-wrap items-center gap-2 shrink-0">
+      <input id="fText" type="text" placeholder="Recherche texte…"
+             class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 w-44"/>
+      <input id="fIp" type="text" placeholder="IP…"
+             class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 placeholder-gray-500 focus:outline-none focus:border-orange-500 w-32"/>
+      <select id="fProto" class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-orange-500">
+        <option value="">Protocole</option>
+        <option value="TCP">TCP</option>
+        <option value="UDP">UDP</option>
+        <option value="ICMP">ICMP</option>
+      </select>
+      <select id="fPriority" class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-orange-500">
+        <option value="">Priorité</option>
+        <option value="1">Priorité 1</option>
+        <option value="2">Priorité 2</option>
+        <option value="3">Priorité 3</option>
+      </select>
+      <select id="fAction" class="px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-orange-500">
+        <option value="">Action</option>
+        <option value="alert">alert</option>
+        <option value="drop">drop</option>
+      </select>
+      <button id="btnResetFilters" class="px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs text-gray-300 transition-colors">Réinitialiser</button>
+    </div>
+
+    <!-- Contenu : console + panel stats -->
+    <div class="flex-1 flex min-h-0 overflow-hidden">
+
+      <!-- Console -->
+      <div id="logConsole" class="flex-1 overflow-y-auto p-4 font-mono text-xs leading-relaxed bg-gray-950">
+        <p class="text-gray-600 italic">En attente d'alertes Snort…</p>
+      </div>
+
+      <!-- Panel Stats -->
+      <div id="statsPanel" class="w-72 shrink-0 border-l border-gray-800 bg-gray-900 flex flex-col overflow-hidden">
+
+        <!-- Mini graphique -->
+        <div class="px-3 pt-3 pb-2 border-b border-gray-800 shrink-0">
+          <p class="text-xs text-orange-400 font-semibold uppercase tracking-widest mb-2">Alertes / minute</p>
+          <canvas id="chartCanvas" width="260" height="70" class="w-full"></canvas>
+        </div>
+
+        <!-- Top SIDs -->
+        <div class="flex-1 flex flex-col min-h-0 border-b border-gray-800">
+          <p class="px-3 py-2 text-xs text-orange-400 font-semibold uppercase tracking-widest shrink-0">Top règles</p>
+          <div id="topSids" class="flex-1 overflow-y-auto text-xs">
+            <p class="text-gray-600 text-xs p-3">En attente…</p>
+          </div>
+        </div>
+
+        <!-- Top IPs -->
+        <div class="flex-1 flex flex-col min-h-0">
+          <p class="px-3 py-2 text-xs text-orange-400 font-semibold uppercase tracking-widest shrink-0">Top IPs sources</p>
+          <div id="topIps" class="flex-1 overflow-y-auto text-xs">
+            <p class="text-gray-600 text-xs p-3">En attente…</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

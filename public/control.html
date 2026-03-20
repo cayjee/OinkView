@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OinkView — Contrôle Snort</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { mono: ['JetBrains Mono','monospace'] } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/style.css"/>
+  <style>
+    @keyframes ping-slow { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:.4;} }
+    .ping-slow { animation: ping-slow 2s ease-in-out infinite; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 h-screen flex overflow-hidden">
+
+  <!-- Sidebar -->
+  <nav class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-5 py-5 border-b border-gray-800">
+      <span class="text-orange-400 font-semibold text-lg tracking-wide">🐗 OinkView</span>
+      <p class="text-xs text-gray-500 mt-0.5">Snort 3 Manager</p>
+    </div>
+    <ul class="flex-1 py-4 space-y-1 px-2">
+      <li><a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="control.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M8.464 15.536a5 5 0 010-7.072m7.072 0a5 5 0 010 7.072M12 12h.01"/></svg>
+        Contrôle Snort
+      </a></li>
+      <li><a href="overview.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Vue Globale
+      </a></li>
+      <li><a href="rules.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Règles
+      </a></li>
+      <li><a href="settings.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Paramètres
+      </a></li>
+    </ul>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <header class="px-8 py-5 border-b border-gray-800 bg-gray-900 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold">Contrôle Snort</h1>
+        <p class="text-xs text-gray-500 mt-0.5">Démarrage, arrêt, mode IDS/IPS, interfaces réseau</p>
+      </div>
+      <!-- Refresh auto toutes les 5s -->
+      <div class="flex items-center gap-3 text-xs text-gray-500">
+        <span id="lastUpdate"></span>
+        <label class="flex items-center gap-1.5 cursor-pointer">
+          <input type="checkbox" id="chkAutoRefresh" checked class="accent-orange-500"/> Auto-refresh
+        </label>
+      </div>
+    </header>
+
+    <div class="p-8 space-y-6 max-w-5xl mx-auto">
+
+      <!-- ── Carte statut ── -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 flex items-center gap-8">
+        <!-- Indicateur -->
+        <div class="relative shrink-0 flex items-center justify-center w-20 h-20">
+          <span id="statusDot" class="absolute w-16 h-16 rounded-full bg-gray-700 ping-slow opacity-30"></span>
+          <span id="statusDotInner" class="relative w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-2xl">
+            ·
+          </span>
+        </div>
+        <!-- Infos -->
+        <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest">Statut</p>
+            <p id="statStatus" class="text-xl font-bold mt-1 text-gray-400">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest">PID</p>
+            <p id="statPid" class="text-xl font-bold mt-1 text-gray-400">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest">Uptime</p>
+            <p id="statUptime" class="text-sm font-semibold mt-1 text-gray-400">—</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-widest">Mémoire</p>
+            <p id="statMem" class="text-xl font-bold mt-1 text-gray-400">—</p>
+          </div>
+        </div>
+        <!-- Mode badge -->
+        <div class="shrink-0 text-center">
+          <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Mode actuel</p>
+          <span id="statMode"
+                class="px-4 py-2 rounded-lg text-sm font-bold bg-gray-800 text-gray-400">—</span>
+        </div>
+      </div>
+
+      <!-- ── Boutons de contrôle ── -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <button id="btnStart"
+                class="flex items-center justify-center gap-2 py-3 rounded-xl bg-green-800/60 hover:bg-green-700 text-green-200 font-semibold text-sm transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Démarrer
+        </button>
+        <button id="btnStop"
+                class="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-900/60 hover:bg-red-800 text-red-200 font-semibold text-sm transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10h6v4H9z"/></svg>
+          Arrêter
+        </button>
+        <button id="btnRestart"
+                class="flex items-center justify-center gap-2 py-3 rounded-xl bg-yellow-900/60 hover:bg-yellow-800 text-yellow-200 font-semibold text-sm transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Redémarrer
+        </button>
+        <button id="btnReload"
+                class="flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-900/60 hover:bg-blue-800 text-blue-200 font-semibold text-sm transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Recharger règles
+        </button>
+      </div>
+
+      <!-- ── Mode IDS / IPS ── -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Mode de détection</h2>
+        </div>
+        <div class="p-6 space-y-5">
+
+          <!-- Toggle IDS / IPS -->
+          <div class="flex gap-3">
+            <button id="btnModeIds"
+                    class="flex-1 py-4 rounded-xl border-2 text-sm font-bold transition-all">
+              <p class="text-lg mb-1">IDS</p>
+              <p class="text-xs font-normal opacity-70">Détection passive — lecture seule du trafic</p>
+            </button>
+            <button id="btnModeIps"
+                    class="flex-1 py-4 rounded-xl border-2 text-sm font-bold transition-all">
+              <p class="text-lg mb-1">IPS</p>
+              <p class="text-xs font-normal opacity-70">Prévention inline — bloque le trafic</p>
+            </button>
+          </div>
+
+          <!-- Config interfaces -->
+          <div id="configIds" class="space-y-3">
+            <label class="field-label">Interface réseau (IDS — écoute passive)</label>
+            <select id="ifaceIds" class="form-select"></select>
+          </div>
+
+          <div id="configIps" class="hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="field-label">Interface entrée (IPS)</label>
+                <select id="ifaceIps1" class="form-select"></select>
+              </div>
+              <div>
+                <label class="field-label">Interface sortie (IPS)</label>
+                <select id="ifaceIps2" class="form-select"></select>
+              </div>
+            </div>
+            <div class="bg-yellow-900/20 border border-yellow-800/40 rounded-lg p-3 text-xs text-yellow-300">
+              ⚠ Le mode IPS nécessite que Snort soit compilé avec le DAQ afpacket et que les deux interfaces soient en mode promiscuité.
+            </div>
+          </div>
+
+          <!-- Commande générée -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="field-label">Commande ExecStart générée</label>
+              <button onclick="copyCmd()" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors">Copier</button>
+            </div>
+            <pre id="generatedCmd" class="bg-gray-950 border border-gray-700 rounded-lg p-3 text-xs text-green-300 whitespace-pre-wrap break-all"></pre>
+          </div>
+
+          <button id="btnApplyMode"
+                  class="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
+            Appliquer le mode et redémarrer Snort
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Interfaces réseau ── -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Interfaces réseau disponibles</h2>
+        </div>
+        <div id="ifaceList" class="divide-y divide-gray-800">
+          <p class="p-6 text-xs text-gray-600">Chargement…</p>
+        </div>
+      </div>
+
+      <!-- ── Sortie systemctl ── -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Sortie systemctl status</h2>
+          <button id="btnToggleOutput" class="text-xs text-gray-400 hover:text-gray-200">Afficher ▾</button>
+        </div>
+        <div id="outputWrapper" class="hidden">
+          <pre id="rawOutput" class="p-6 text-xs text-gray-400 overflow-auto max-h-64 whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+  <script src="/js/control.js"></script>
+</body>
+</html>

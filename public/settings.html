@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OinkView — Paramètres</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { mono: ['JetBrains Mono','monospace'] } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <nav class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-5 py-5 border-b border-gray-800">
+      <span class="text-orange-400 font-semibold text-lg tracking-wide">🐗 OinkView</span>
+      <p class="text-xs text-gray-500 mt-0.5">Snort 3 Manager</p>
+    </div>
+    <ul class="flex-1 py-4 space-y-1 px-2">
+      <li>
+        <a href="index.html"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="overview.html"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+          Vue Globale
+        </a>
+      </li>
+      <li>
+        <a href="stats.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          Statistiques
+        </a>
+      </li>
+      <li>
+        <a href="rules.html"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+          Règles
+        </a>
+      </li>
+      <li>
+        <a href="settings.html"
+           class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Paramètres
+        </a>
+      </li>
+    </ul>
+    <div class="p-3 border-t border-gray-800">
+      <button id="btnReload"
+              class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Reload Snort
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <header class="px-8 py-5 border-b border-gray-800 bg-gray-900">
+      <h1 class="text-lg font-semibold">Paramètres</h1>
+      <p class="text-xs text-gray-500 mt-0.5">Chemins des fichiers Snort et commandes système</p>
+    </header>
+
+    <div class="max-w-2xl mx-auto p-8 space-y-8">
+
+      <!-- Section: Fichiers -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
+        <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Fichiers Snort</h2>
+
+        <!-- Rules file -->
+        <div>
+          <label class="field-label">Fichier de règles locales (local.rules)</label>
+          <div class="flex gap-2">
+            <input id="rulesFile" type="text" class="form-input flex-1"
+                   placeholder="/etc/snort/rules/local.rules"/>
+            <button onclick="testPath('rulesFile', 'rw')"
+                    class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
+              Tester
+            </button>
+          </div>
+          <p id="rulesFileStatus" class="text-xs mt-1 text-gray-600"></p>
+        </div>
+
+        <!-- Log file -->
+        <div>
+          <label class="field-label">Fichier de logs d'alertes</label>
+          <div class="flex gap-2">
+            <input id="logFile" type="text" class="form-input flex-1"
+                   placeholder="/var/log/snort/alert_fast.txt"/>
+            <button onclick="testPath('logFile', 'r')"
+                    class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
+              Tester
+            </button>
+          </div>
+          <p id="logFileStatus" class="text-xs mt-1 text-gray-600"></p>
+        </div>
+
+        <!-- Log format -->
+        <div>
+          <label class="field-label">Format du log</label>
+          <select id="logFormat"
+                  class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
+            <option value="fast">alert_fast  (texte brut)</option>
+            <option value="json">alert_json  (JSON structuré)</option>
+          </select>
+        </div>
+
+        <!-- Community rules directory -->
+        <div>
+          <label class="field-label">Dossier des règles communautaires</label>
+          <div class="flex gap-2">
+            <input id="communityRulesDir" type="text" class="form-input flex-1"
+                   placeholder="/usr/local/etc/snort/rules"/>
+            <button onclick="testPath('communityRulesDir')"
+                    class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
+              Tester
+            </button>
+          </div>
+          <p id="communityRulesDirStatus" class="text-xs mt-1 text-gray-600">Tous les fichiers .rules de ce dossier seront lus en lecture seule.</p>
+        </div>
+
+        <!-- Snort config -->
+        <div>
+          <label class="field-label">Fichier de configuration principal (snort.lua)</label>
+          <div class="flex gap-2">
+            <input id="snortConfig" type="text" class="form-input flex-1"
+                   placeholder="/etc/snort/snort.lua"/>
+            <button onclick="testPath('snortConfig')"
+                    class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
+              Tester
+            </button>
+          </div>
+          <p id="snortConfigStatus" class="text-xs mt-1 text-gray-600"></p>
+        </div>
+
+        <!-- Snort binary -->
+        <div>
+          <label class="field-label">Binaire Snort</label>
+          <input id="snortBin" type="text" class="form-input" placeholder="/usr/local/bin/snort"/>
+        </div>
+
+        <!-- Interface réseau -->
+        <div>
+          <label class="field-label">Interface réseau par défaut</label>
+          <input id="snortInterface" type="text" class="form-input w-40" placeholder="eth0"/>
+          <p class="text-xs text-gray-600 mt-1">Utilisée dans les commandes Snort ci-dessous.</p>
+        </div>
+
+        <!-- Tail lines -->
+        <div>
+          <label class="field-label">Nombre de lignes à afficher au chargement</label>
+          <input id="tailLines" type="number" value="200" min="10" max="5000" class="form-input w-32"/>
+        </div>
+      </div>
+
+      <!-- Section: Reload command -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
+        <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Rechargement Snort</h2>
+
+        <div>
+          <label class="field-label">Commande de rechargement</label>
+          <input id="reloadCommand" type="text" class="form-input"
+                 placeholder="systemctl reload snort3"/>
+          <p class="text-xs text-gray-600 mt-1">
+            Alternatives : <code class="text-gray-400">kill -SIGHUP $(cat /var/run/snort/snort.pid)</code>
+          </p>
+        </div>
+
+        <div>
+          <label class="field-label">Fichier PID Snort (optionnel)</label>
+          <input id="snortPidFile" type="text" class="form-input"
+                 placeholder="/var/run/snort/snort.pid"/>
+          <p class="text-xs text-gray-600 mt-1">Utilisé en fallback si la commande ci-dessus est vide.</p>
+        </div>
+      </div>
+
+      <!-- VirusTotal -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+        <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">VirusTotal</h2>
+        <p class="text-xs text-gray-500">Permet de verifier la reputation des IPs detectees par Snort. Cle gratuite sur <span class="text-orange-400">virustotal.com</span> (500 req/jour).</p>
+        <div>
+          <label class="field-label">Cle API VirusTotal</label>
+          <input id="virusTotalApiKey" type="password" class="form-input font-mono" placeholder="Votre cle API..."/>
+          <p class="text-xs text-gray-600 mt-1">Stockee cote serveur, jamais exposee au navigateur.</p>
+        </div>
+      </div>
+
+      <!-- Save button -->
+      <div class="flex items-center gap-3">
+        <button id="btnSave"
+                class="px-6 py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
+          Sauvegarder les paramètres
+        </button>
+        <span id="saveStatus" class="text-xs text-gray-500"></span>
+      </div>
+
+      <!-- Commandes Snort -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+        <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Commandes Snort</h2>
+        <p class="text-xs text-gray-500">Commandes generees depuis vos parametres, pretes a copier-coller dans le terminal.</p>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Demarrer Snort (mode IDS passif)</span>
+            <button onclick="copyBlock('cmd-start-ids')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-start-ids" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Tester la configuration</span>
+            <button onclick="copyBlock('cmd-test')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-test" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Arreter Snort</span>
+            <button onclick="copyBlock('cmd-stop')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-stop" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Voir les alertes en direct</span>
+            <button onclick="copyBlock('cmd-tail')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-tail" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Verifier que Snort tourne</span>
+            <button onclick="copyBlock('cmd-status')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-status" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-400 font-medium">Version de Snort</span>
+            <button onclick="copyBlock('cmd-version')" class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">Copier</button>
+          </div>
+          <pre id="cmd-version" class="bg-gray-950 rounded p-3 text-green-300 text-xs overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+
+      <!-- Permissions Linux -->
+      <div class="bg-blue-900/20 border border-blue-800/40 rounded-xl p-5 text-xs text-blue-300 space-y-4 leading-relaxed">
+        <p class="font-semibold text-blue-200 text-sm">Permissions Linux requises</p>
+        <p>Le processus Node.js doit pouvoir <strong>lire et écrire</strong> dans <code class="text-orange-300" id="perm-rules"></code>
+           et <strong>lire</strong> <code class="text-orange-300" id="perm-log"></code>.</p>
+
+        <!-- Bloc 1 : droits sur les fichiers -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-blue-300 font-medium">Droits sur les fichiers Snort</span>
+            <button onclick="copyBlock('cmd-files')"
+                    class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              Copier
+            </button>
+          </div>
+          <pre id="cmd-files" class="bg-gray-950 rounded p-3 text-green-300 overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <!-- Bloc 2 : sudoers pour reload -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-blue-300 font-medium">Autoriser reload sans mot de passe (sudoers)</span>
+            <button onclick="copyBlock('cmd-sudo')"
+                    class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              Copier
+            </button>
+          </div>
+          <pre id="cmd-sudo" class="bg-gray-950 rounded p-3 text-green-300 overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+
+        <!-- Bloc 3 : dossier règles communautaires -->
+        <div id="perm-community-block">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-blue-300 font-medium">Accès lecture au dossier communautaire</span>
+            <button onclick="copyBlock('cmd-community')"
+                    class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+              Copier
+            </button>
+          </div>
+          <pre id="cmd-community" class="bg-gray-950 rounded p-3 text-green-300 overflow-x-auto whitespace-pre-wrap"></pre>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+
+  <script src="/js/settings.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+/* OinkView — shared styles */
+
+body { font-family: 'JetBrains Mono', monospace; }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #1e2130; }
+::-webkit-scrollbar-thumb { background: #3b4263; border-radius: 3px; }
+
+/* ── Selects & Options ────────────────────────────────────────────────────────
+   Native <select> on Windows ignores most CSS inside the dropdown.
+   The trick: force a light background + dark text on BOTH the element
+   and every option so the OS renderer picks it up.                          */
+select {
+  color: #f1f5f9;           /* text-slate-100  — label visible when closed  */
+  background-color: #1f2937; /* gray-800                                     */
+}
+select option {
+  color:            #111827 !important;  /* near-black text                 */
+  background-color: #f9fafb !important;  /* near-white background            */
+  font-size:        0.875rem;
+}
+
+/* Tailwind utility aliases for shared form elements */
+.field-label {
+  display: block;
+  font-size: 0.65rem;
+  color: #9ca3af;
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.form-input,
+.form-select {
+  width: 100%;
+  background-color: #1f2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  transition: border-color 0.15s;
+  font-family: inherit;
+}
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #f97316;  /* orange-500 */
+}

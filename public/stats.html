@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OinkView — Statistiques</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { mono: ['JetBrains Mono','monospace'] } } } }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex">
+
+  <!-- Sidebar -->
+  <nav class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
+    <div class="px-5 py-5 border-b border-gray-800">
+      <span class="text-orange-400 font-semibold text-lg tracking-wide">OinkView</span>
+      <p class="text-xs text-gray-500 mt-0.5">Snort 3 Manager</p>
+    </div>
+    <ul class="flex-1 py-4 space-y-1 px-2">
+      <li><a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="overview.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Vue Globale
+      </a></li>
+      <li><a href="rules.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Regles
+      </a></li>
+      <li><a href="stats.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        Statistiques
+      </a></li>
+      <li><a href="settings.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Parametres
+      </a></li>
+    </ul>
+    <div class="p-3 border-t border-gray-800">
+      <button id="btnReload" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reload Snort
+      </button>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="flex-1 overflow-y-auto">
+    <header class="px-8 py-5 border-b border-gray-800 bg-gray-900 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold">Statistiques</h1>
+        <p class="text-xs text-gray-500 mt-0.5">Analyse des alertes depuis le fichier log Snort</p>
+      </div>
+      <div class="flex gap-2">
+        <button id="btnRefresh" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-sm text-gray-300 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Rafraichir
+        </button>
+        <button id="btnReset" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-900/50 hover:bg-red-800 text-sm text-red-300 font-medium transition-colors">
+          Reinitialiser
+        </button>
+      </div>
+    </header>
+
+    <div class="p-8 space-y-8 max-w-6xl mx-auto">
+
+      <!-- Stat cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">Total alertes</p>
+          <p id="statTotal" class="text-3xl font-bold text-orange-400 mt-2">0</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">TCP</p>
+          <p id="statTcp" class="text-3xl font-bold text-blue-400 mt-2">0</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">UDP</p>
+          <p id="statUdp" class="text-3xl font-bold text-green-400 mt-2">0</p>
+        </div>
+        <div class="bg-gray-900 border border-gray-800 rounded-xl p-5">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">ICMP</p>
+          <p id="statIcmp" class="text-3xl font-bold text-yellow-400 mt-2">0</p>
+        </div>
+      </div>
+
+      <!-- Time chart -->
+      <section class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Activite par minute — 60 dernieres minutes</h2>
+        </div>
+        <div class="p-6">
+          <canvas id="timeChart" height="80" class="w-full"></canvas>
+        </div>
+      </section>
+
+      <!-- Pie charts -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest mb-4">Protocoles</h2>
+          <div class="flex items-center gap-8">
+            <svg id="protoChart" viewBox="0 0 120 120" class="w-28 h-28 shrink-0"></svg>
+            <div id="protoLegend" class="space-y-2 text-xs"></div>
+          </div>
+        </section>
+        <section class="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest mb-4">Priorites</h2>
+          <div class="flex items-center gap-8">
+            <svg id="prioChart" viewBox="0 0 120 120" class="w-28 h-28 shrink-0"></svg>
+            <div id="prioLegend" class="space-y-2 text-xs"></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Top IPs -->
+      <section class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Top 10 IPs sources</h2>
+        </div>
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-800 text-left text-xs text-gray-500">
+              <th class="px-6 py-3 font-medium">#</th>
+              <th class="px-6 py-3 font-medium">IP</th>
+              <th class="px-6 py-3 font-medium">Pays</th>
+              <th class="px-6 py-3 font-medium">Ville</th>
+              <th class="px-6 py-3 font-medium text-right">Alertes</th>
+              <th class="px-6 py-3 font-medium text-right">VirusTotal</th>
+            </tr>
+          </thead>
+          <tbody id="tableIps" class="divide-y divide-gray-800 text-sm">
+            <tr><td colspan="5" class="px-6 py-4 text-gray-600 text-xs">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Top SIDs -->
+      <section class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-800">
+          <h2 class="text-sm font-semibold text-orange-400 uppercase tracking-widest">Top 10 Regles declenchees</h2>
+        </div>
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-gray-800 text-left text-xs text-gray-500">
+              <th class="px-6 py-3 font-medium">SID</th>
+              <th class="px-6 py-3 font-medium">Message</th>
+              <th class="px-6 py-3 font-medium text-right">Declenchements</th>
+            </tr>
+          </thead>
+          <tbody id="tableSids" class="divide-y divide-gray-800 text-sm">
+            <tr><td colspan="3" class="px-6 py-4 text-gray-600 text-xs">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+  <script src="/js/stats.js"></script>
+</body>
+</html>
