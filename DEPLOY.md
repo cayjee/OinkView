@@ -1,6 +1,6 @@
 # OinkView — Guide d'utilisation
 
-Interface web de gestion Snort 3 : installation Docker et référence complète du générateur de règles.
+Interface web de gestion Snort 3 : installation Docker, référence des menus et générateur de règles complet.
 
 ---
 
@@ -53,7 +53,7 @@ docker compose down
 docker compose logs -f
 
 # Redémarrer après mise à jour
-docker compose pull && docker compose up -d
+git pull && docker compose up -d --build
 ```
 
 ---
@@ -66,19 +66,185 @@ Au premier lancement, aller dans **Paramètres** et renseigner :
 |---|---|---|
 | Fichier de règles | `/etc/snort/rules/local.rules` | Règles locales (lecture/écriture) |
 | Fichier de log | `/var/log/snort/alert_fast.txt` | Log d'alertes Snort |
-| Config Snort | `/etc/snort/snort.lua` | Fichier de configuration principal |
-| Répertoire communautaire | `/etc/snort/rules/` | Règles communautaires (lecture seule) |
+| Config Snort | `/usr/local/etc/snort/snort.lua` | Fichier de configuration principal |
+| Répertoire communautaire | `/usr/local/etc/snort/rules/` | Règles communautaires (lecture seule) |
+| Binaire Snort | `/usr/local/bin/snort` | Chemin vers l'exécutable Snort |
+| Interface réseau | `eth0` | Interface par défaut pour les commandes générées |
 | Commande de reload | `systemctl reload snort3` | Commande pour recharger Snort |
+| Format du log | `alert_fast` ou `alert_json` | Format du fichier de log Snort |
+| Lignes au chargement | `200` | Nombre de lignes historiques chargées au démarrage |
 
 Cliquer sur **Tester** pour vérifier l'accès aux fichiers, puis **Sauvegarder**.
 
 ---
 
-## Générateur de règles Snort 3
+## Authentification
 
-Accessible via le menu **Règles**. Le formulaire génère une règle Snort 3 valide en temps réel et l'ajoute dans `local.rules`.
+OinkView intègre un système d'authentification par token optionnel.
+
+### Activer la protection par mot de passe
+
+1. Aller dans **Paramètres → Authentification**
+2. Cocher **Activer l'authentification par mot de passe**
+3. Saisir un mot de passe dans le champ prévu
+4. Cliquer sur **Sauvegarder les paramètres**
+5. Recharger la page — OinkView redirige vers la page de connexion
+
+### Se connecter
+
+Accéder à `/login.html`, saisir le mot de passe et cliquer sur **Se connecter**. Un token de session est stocké dans le navigateur.
+
+### Désactiver l'authentification
+
+Décocher la case dans **Paramètres → Authentification** et sauvegarder.
+
+> L'authentification est désactivée par défaut. Le token est purement en mémoire : il est invalidé à chaque redémarrage du serveur.
 
 ---
+
+## Dashboard — Console d'alertes
+
+Menu principal, accessible via **Dashboard**.
+
+### Flux temps réel
+
+Les alertes Snort arrivent en temps réel via WebSocket. L'indicateur en haut à droite affiche l'état de la connexion :
+- Point vert clignotant : connecté
+- Point gris : déconnecté (reconnexion automatique)
+
+### Compteurs
+
+| Badge | Description |
+|---|---|
+| `N alert` | Nombre d'alertes depuis le dernier reset |
+| `N drop` | Nombre de paquets bloqués (action `drop`) |
+
+### Détail d'une alerte
+
+Cliquer sur une ligne de la console pour ouvrir le modal de détail, qui affiche :
+- Timestamp complet
+- Action, protocole, GID/SID/Rev
+- IP source et destination avec ports
+- Classification, priorité
+- Message complet
+- Ligne brute
+
+### Filtres
+
+| Filtre | Description |
+|---|---|
+| Recherche texte | Cherche dans toute la ligne |
+| IP | Filtre sur l'IP source ou destination |
+| Protocole | TCP / UDP / ICMP |
+| Priorité | 1, 2 ou 3 |
+| Action | `alert` ou `drop` |
+| De / À | Plage horaire (datetime-local) |
+
+Cliquer sur **Réinitialiser** pour effacer tous les filtres.
+
+### Boutons d'action
+
+| Bouton | Description |
+|---|---|
+| **Vider console** | Efface l'affichage (ne supprime pas les données) |
+| **Réinitialiser tout** | Remet à zéro les compteurs et le cache geo |
+| **Export TXT** | Télécharge les lignes visibles en texte brut |
+| **Export CSV** | Télécharge les lignes visibles au format CSV |
+| **Autoscroll** | Active/désactive le défilement automatique |
+| **◀ Stats** | Affiche/masque le panneau statistiques latéral |
+| **Reload Snort** | Envoie la commande de rechargement Snort (confirmation requise) |
+
+### Panneau statistiques latéral
+
+- **Graphique alertes/minute** — mini sparkline temps réel
+- **Top règles** — SIDs les plus déclenchés
+- **Top IPs sources** — avec géolocalisation hors-ligne (pays, ville)
+
+---
+
+## Vue Globale
+
+Menu **Vue Globale** — vue d'ensemble de la configuration Snort en cours.
+
+| Section | Contenu |
+|---|---|
+| **Statistiques globales** | Total règles chargées, règles actives/désactivées, nombre de fichiers |
+| **Variables Snort** | `HOME_NET`, `EXTERNAL_NET`, `HTTP_PORTS`, etc. extraites de `snort.lua` |
+| **Modules actifs** | Liste des plugins/modules chargés dans la configuration |
+| **Fichiers de règles** | Liste de tous les fichiers `.rules` chargés avec leur statut |
+
+---
+
+## Statistiques
+
+Menu **Statistiques** — analyse agrégée des alertes.
+
+| Section | Contenu |
+|---|---|
+| **Cartes** | Total alertes, TCP, UDP, ICMP |
+| **Graphique 60 min** | Activité par minute sur la dernière heure |
+| **Répartition protocoles** | Camembert TCP/UDP/ICMP/Autre |
+| **Répartition priorités** | Camembert priorités 1/2/3 |
+| **Top 10 règles** | SIDs les plus déclenchés avec message |
+| **Top 10 IPs sources** | Avec pays et ville (géolocalisation hors-ligne) |
+
+Boutons disponibles :
+- **Rafraîchir** — recharge les données
+- **Réinitialiser** — remet les stats à zéro
+- **Reload Snort** — recharge Snort
+
+---
+
+## Règles
+
+Menu **Règles** — éditeur et liste des règles.
+
+### Panneau gauche : Générateur de règles
+
+Le formulaire génère une règle Snort 3 valide en temps réel dans l'aperçu. Deux boutons en bas :
+
+| Bouton | Description |
+|---|---|
+| **Tester config Snort** | Lance `snort -c snort.lua -T` et affiche le résultat |
+| **Sauvegarder** | Ajoute la règle dans `local.rules` avec le prochain SID disponible |
+
+### Panneau droit : Liste des règles
+
+#### Filtres de la liste
+
+| Filtre | Description |
+|---|---|
+| Recherche | SID, message, action, chemin fichier |
+| Source | Toutes / Locales uniquement / Communautaires uniquement |
+| Catégorie | Filtre par fichier de règles communautaires |
+| Classtype | Filtre par type de menace |
+
+#### Actions sur une règle
+
+| Bouton | Description |
+|---|---|
+| ✎ | Charge la règle dans l'éditeur (nouveau SID assigné automatiquement) |
+| ⊞ | Affiche la règle brute |
+| ▶ / ⏸ | Active ou désactive la règle (locales uniquement) |
+| ✕ | Supprime la règle (locales uniquement, confirmation requise) |
+| +local | Copie une règle communautaire dans `local.rules` pour la modifier |
+
+#### Sélection multiple (bulk)
+
+Cocher plusieurs règles via les cases à gauche, ou utiliser **Tout sélectionner** (en-tête de tableau). La barre d'actions bulk apparaît :
+
+| Bouton | Description |
+|---|---|
+| **▶ Activer** | Active toutes les règles locales sélectionnées |
+| **⏸ Désactiver** | Désactive toutes les règles locales sélectionnées |
+| **✕ Supprimer** | Supprime toutes les règles locales sélectionnées (confirmation requise) |
+| **Annuler** | Efface la sélection |
+
+> Les règles communautaires ne peuvent pas être modifiées en bulk — les copier en local d'abord via **+local**.
+
+---
+
+## Générateur de règles Snort 3 — Référence complète
 
 ### Type de règle
 
@@ -110,6 +276,17 @@ Accessible via le menu **Règles**. Le formulaire génère une règle Snort 3 va
 | **Direction** | `->` unidirectionnel, `<>` bidirectionnel | Sens du trafic |
 | **IP Source / Destination** | `any`, `192.168.1.0/24`, `$HOME_NET`, `!10.0.0.0/8`, `[1.2.3.4,5.6.7.8]` | Adresse ou groupe |
 | **Port Source / Destination** | `any`, `80`, `443`, `[80,443,8080]`, `1024:65535`, `!22` | Port ou plage |
+
+**Variables Snort disponibles en autocomplétion :**
+
+| Variable IP | Variable Port |
+|---|---|
+| `$HOME_NET` | `$HTTP_PORTS` |
+| `$EXTERNAL_NET` | `$SHELLCODE_PORTS` |
+| `$HTTP_SERVERS` | `$ORACLE_PORTS` |
+| `$SQL_SERVERS` | `$SSH_PORTS` |
+| `$SMTP_SERVERS` | `$FTP_PORTS` |
+| `$DNS_SERVERS` | `$SIP_PORTS` |
 
 ---
 
@@ -146,7 +323,10 @@ Catégorie de la menace. Influence la priorité par défaut.
 | `protocol-command-decode` | Commande protocolaire anormale |
 | `suspicious-login` | Tentative de connexion suspecte |
 | `misc-attack` | Attaque diverse |
-| *(et 13 autres)* | ... |
+| `misc-activity` | Activité diverse |
+| `bad-unknown` | Trafic inconnu suspect |
+| `default-login-attempt` | Tentative avec identifiants par défaut |
+| `icmp-event` | Événement ICMP |
 
 #### `priority`
 Priorité explicite de 1 (critique) à 255 (faible). Écrase la priorité du classtype.
@@ -247,8 +427,6 @@ pcre:"/^GET\s+\/admin/i";
 ### Détection réseau
 
 #### Flags TCP
-
-Sélectionner les flags à tester :
 
 | Flag | Lettre | Description |
 |---|---|---|
@@ -484,18 +662,58 @@ alert tcp any any -> $HOME_NET 9200 ( msg:"Elasticsearch large request body"; fl
 alert http any any -> $HOME_NET any ( msg:"SQL Injection attempt"; flow:to_server,established; http_uri; pcre:"/(\%27)|(\')|(\-\-)|(\%23)|(#)/i"; classtype:web-application-attack; sid:1000005; rev:1; )
 ```
 
+### Brute-force SSH
+
+```
+alert tcp any any -> $HOME_NET $SSH_PORTS ( msg:"SSH Brute Force attempt"; flow:to_server,established; content:"SSH"; detection_filter:track by_src, count 5, seconds 10; classtype:attempted-admin; sid:1000006; rev:1; )
+```
+
 ---
 
-## Gestion des règles
+## Paramètres — Référence
 
-### Activer / Désactiver
-Cliquer sur ⏸ pour désactiver une règle (commentée dans le fichier avec `#`). Cliquer sur ▶ pour la réactiver.
+### Fichiers Snort
 
-### Charger dans l'éditeur
-Cliquer sur ✎ pour charger une règle existante dans le générateur. Un nouveau SID est automatiquement assigné.
+| Champ | Description |
+|---|---|
+| Fichier de règles locales | Fichier `local.rules` — lecture et écriture par OinkView |
+| Fichier de logs | Log d'alertes Snort lu en temps réel |
+| Format du log | `alert_fast` (texte) ou `alert_json` (JSON structuré) |
+| Dossier communautaire | Tous les `.rules` de ce dossier sont chargés en lecture seule |
+| Fichier de configuration | `snort.lua` — utilisé pour la validation et la vue globale |
+| Binaire Snort | Chemin vers l'exécutable `snort` |
+| Interface réseau | Interface utilisée dans les commandes générées |
+| Lignes au chargement | Historique affiché à l'ouverture du dashboard |
 
-### Règles communautaires
-Les règles communautaires sont en lecture seule. Cliquer sur **+local** pour copier une règle dans `local.rules` avec un nouveau SID, afin de la modifier.
+### Rechargement Snort
 
-### Reload Snort
-Le bouton **Reload Snort** en bas de la sidebar envoie la commande configurée dans Paramètres pour recharger Snort sans interruption de service.
+| Champ | Description |
+|---|---|
+| Commande de rechargement | Ex: `systemctl reload snort3` ou `kill -SIGHUP $(cat /var/run/snort/snort.pid)` |
+| Fichier PID | Utilisé en fallback si la commande est vide |
+
+### Authentification
+
+| Champ | Description |
+|---|---|
+| Activer l'authentification | Protège toutes les pages par un mot de passe |
+| Mot de passe | Laisser vide pour conserver le mot de passe actuel |
+
+### Commandes Snort générées
+
+La section en bas de page génère automatiquement les commandes utiles à partir de vos paramètres :
+
+| Commande | Description |
+|---|---|
+| Démarrer Snort (IDS passif) | Lance Snort en mode capture |
+| Tester la configuration | `snort -c snort.lua -T` |
+| Arrêter Snort | `pkill -f snort` |
+| Voir les alertes en direct | `tail -f <logfile>` |
+| Vérifier que Snort tourne | `ps aux | grep snort` |
+| Version de Snort | `snort --version` |
+
+Chaque commande dispose d'un bouton **Copier**.
+
+### Permissions Linux
+
+La section **Permissions Linux requises** génère les commandes `chmod`/`chown` et `sudoers` adaptées à vos chemins configurés.
