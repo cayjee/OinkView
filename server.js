@@ -135,8 +135,8 @@ function nextSid(content) {
 function authMiddleware(req, res, next) {
   const settings = loadSettings();
   if (!settings.authEnabled) return next();
-  // Allow login endpoint without token
-  if (req.path === '/api/auth/login' || req.path === '/api/auth/check') return next();
+  // req.path is relative to the mount point '/api' → '/auth/login', not '/api/auth/login'
+  if (req.path === '/auth/login' || req.path === '/auth/check' || req.path === '/auth/logout') return next();
   const token = req.headers['x-auth-token'] || '';
   if (!token || !sessions.has(token)) return res.status(401).json({ error: 'Non autorisé' });
   next();
