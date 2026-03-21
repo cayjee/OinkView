@@ -577,8 +577,9 @@ app.post('/api/rules/validate', (_req, res) => {
   if (!snortBin || !snortConfig)
     return res.status(400).json({ ok: false, output: 'snortBin ou snortConfig non configuré dans les Paramètres.' });
   exec(`${snortBin} -c ${snortConfig} -T 2>&1`, { timeout: 30000 }, (error, stdout, stderr) => {
-    const output = (stdout + stderr).trim();
-    res.json({ ok: !error, output });
+    const output  = (stdout + stderr).trim();
+    const success = output.includes('successfully validated');
+    res.json({ success, output });
   });
 });
 
