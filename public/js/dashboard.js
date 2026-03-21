@@ -1,9 +1,9 @@
 /**
- * dashboard.js — Console temps réel avec stats, filtres, export, géo
+ * dashboard.js — Console temps réel avec stats, filtres, export, géo locale
  */
 'use strict';
 
-const socket        = io();
+const socket        = io({ auth: { token: localStorage.getItem('oinkview_token') || '' } });
 const logConsole    = document.getElementById('logConsole');
 const liveStatus    = document.getElementById('liveStatus');
 const liveIndicator = document.getElementById('liveIndicator');
@@ -13,7 +13,7 @@ const btnReload     = document.getElementById('btnReload');
 
 let alertCount = 0;
 let dropCount  = 0;
-const MAX_LINES = 2000;
+const MAX_LINES = 5000; // augmenté — les plus vieilles lignes sont retirées du DOM
 
 // ── Stats en mémoire ──────────────────────────────────────────────────────────
 
@@ -29,22 +29,46 @@ const stats = {
 // ── Parser ligne Snort fast-alert ─────────────────────────────────────────────
 
 function parseLine(text) {
+  const tsM    = text.match(/^(\d+)\/(\d+)-(\d+):(\d+):(\d+)\.(\d+)/);
   const sidM   = text.match(/\[(\d+):(\d+):(\d+)\]/);
   const msgM   = text.match(/\[\*\*\]\s+\[\d+:\d+:\d+\]\s+(.+?)\s+\[\*\*\]/);
+  const clsM   = text.match(/\[Classification:\s*([^\]]+)\]/);
   const prioM  = text.match(/\[Priority:\s*(\d+)\]/);
   const protoM = text.match(/\{(\w+)\}/);
-  const ipM    = text.match(/(\d+\.\d+\.\d+\.\d+)(?::\d+)?\s+->\s+(\d+\.\d+\.\d+\.\d+)/);
+  const ipM    = text.match(/(\d+\.\d+\.\d+\.\d+)(?::(\d+))?\s+->\s+(\d+\.\d+\.\d+\.\d+)(?::(\d+))?/);
   const lower  = text.toLowerCase();
   let action = 'info';
   if (lower.includes('[drop]') || lower.includes('[reject]')) action = 'drop';
   else if (lower.includes('[alert]') || sidM) action = 'alert';
+
+  // Construire un timestamp ISO depuis le timestamp Snort (sans année → année courante)
+  let isoTs = null;
+  if (tsM) {
+    const now = new Date();
+    isoTs = new Date(
+      now.getFullYear(),
+      parseInt(tsM[1]) - 1,
+      parseInt(tsM[2]),
+      parseInt(tsM[3]),
+      parseInt(tsM[4]),
+      parseInt(tsM[5])
+    ).toISOString();
+  }
+
   return {
-    sid:      sidM   ? sidM[2]            : null,
-    msg:      msgM   ? msgM[1]            : null,
-    priority: prioM  ? prioM[1]           : null,
-    proto:    protoM ? protoM[1].toUpperCase() : null,
-    srcIp:    ipM    ? ipM[1]             : null,
-    dstIp:    ipM    ? ipM[2]             : null,
+    raw:            text,
+    isoTs,
+    gid:            sidM   ? sidM[1]            : null,
+    sid:            sidM   ? sidM[2]            : null,
+    rev:            sidM   ? sidM[3]            : null,
+    msg:            msgM   ? msgM[1]            : null,
+    classification: clsM   ? clsM[1].trim()    : null,
+    priority:       prioM  ? prioM[1]           : null,
+    proto:          protoM ? protoM[1].toUpperCase() : null,
+    srcIp:          ipM    ? ipM[1]             : null,
+    srcPort:        ipM    ? ipM[2]             : null,
+    dstIp:          ipM    ? ipM[3]             : null,
+    dstPort:        ipM    ? ipM[4]             : null,
     action
   };
 }
@@ -81,7 +105,7 @@ function trackStats(parsed) {
     stats.priorityCounts[parsed.priority]++;
 }
 
-// ── Géolocalisation ───────────────────────────────────────────────────────────
+// ── Géolocalisation locale (/api/geo/batch — aucune requête internet) ──────────
 
 const GEO_QUEUE = new Set();
 let geoTimer = null;
@@ -92,9 +116,9 @@ function isPrivateIp(ip) {
 
 function queueGeo(ip) {
   if (!ip || isPrivateIp(ip) || stats.ipGeo[ip] !== undefined) return;
-  stats.ipGeo[ip] = null; // marque comme en attente
+  stats.ipGeo[ip] = null;
   GEO_QUEUE.add(ip);
-  if (!geoTimer) geoTimer = setTimeout(flushGeo, 4000);
+  if (!geoTimer) geoTimer = setTimeout(flushGeo, 2000);
 }
 
 async function flushGeo() {
@@ -103,15 +127,17 @@ async function flushGeo() {
   GEO_QUEUE.clear();
   if (!ips.length) return;
   try {
-    const r    = await fetch('http://ip-api.com/batch?fields=status,country,countryCode,city,query', {
+    const r    = await fetch('/api/geo/batch', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(ips.map(function(q) { return { query: q }; }))
+      body:    JSON.stringify({ ips })
     });
     const data = await r.json();
-    data.forEach(function(d) {
-      stats.ipGeo[d.query] = d.status === 'success' ? d : { country: '?', countryCode: '', city: '?' };
-    });
+    if (data.results) {
+      ips.forEach(ip => {
+        stats.ipGeo[ip] = data.results[ip] || { country: '', countryCode: '', city: '' };
+      });
+    }
     renderTopIps();
   } catch (_) {}
 }
@@ -144,8 +170,7 @@ function drawChart() {
   const cW = W - pL - pR, cH = H - pT - pB;
   const bW = cW / values.length;
 
-  ctx.strokeStyle = '#374151';
-  ctx.lineWidth   = 0.5;
+  ctx.strokeStyle = '#374151'; ctx.lineWidth = 0.5;
   for (var g = 0; g <= 3; g++) {
     const y = pT + cH - (cH * g / 3);
     ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(W - pR, y); ctx.stroke();
@@ -210,9 +235,14 @@ function renderTopIps() {
     const geo  = stats.ipGeo[ip];
     const priv = isPrivateIp(ip);
     let geoStr;
-    if (priv) geoStr = '<span class="text-gray-600">Local</span>';
-    else if (geo && geo.country) geoStr = (geo.countryCode ? '<img src="https://flagcdn.com/16x12/' + geo.countryCode.toLowerCase() + '.png" class="inline w-4 mr-1 align-middle" onerror="this.style.display=\'none\'">' : '') + '<span class="text-gray-400">' + geo.city + '</span>';
-    else geoStr = '<span class="text-gray-600">…</span>';
+    if (priv) {
+      geoStr = '<span class="text-gray-600">Réseau local</span>';
+    } else if (geo && geo.country) {
+      const loc = [geo.countryCode, geo.city].filter(Boolean).join(' · ');
+      geoStr = '<span class="text-gray-400 font-mono">' + loc + '</span>';
+    } else {
+      geoStr = '<span class="text-gray-600">…</span>';
+    }
     return '<div class="flex items-center gap-2 px-3 py-1.5 border-b border-gray-800 last:border-0">' +
       '<span class="text-orange-400 font-mono text-xs w-8 shrink-0 text-right">' + count + '</span>' +
       '<span class="font-mono text-xs text-cyan-400 w-24 shrink-0">' + ip + '</span>' +
@@ -233,17 +263,21 @@ function highlightLine(text) {
 
 // ── Filtres ───────────────────────────────────────────────────────────────────
 
-const filters = { text: '', proto: '', priority: '', action: '', ip: '' };
+const filters = { text: '', proto: '', priority: '', action: '', ip: '', timeStart: null, timeEnd: null };
 
 function getFilters() {
-  filters.text     = document.getElementById('fText').value.trim().toLowerCase();
-  filters.proto    = document.getElementById('fProto').value;
-  filters.priority = document.getElementById('fPriority').value;
-  filters.action   = document.getElementById('fAction').value;
-  filters.ip       = document.getElementById('fIp').value.trim();
+  filters.text      = document.getElementById('fText').value.trim().toLowerCase();
+  filters.proto     = document.getElementById('fProto').value;
+  filters.priority  = document.getElementById('fPriority').value;
+  filters.action    = document.getElementById('fAction').value;
+  filters.ip        = document.getElementById('fIp').value.trim();
+  const tsEl        = document.getElementById('fTimeStart');
+  const teEl        = document.getElementById('fTimeEnd');
+  filters.timeStart = tsEl && tsEl.value ? new Date(tsEl.value).getTime() : null;
+  filters.timeEnd   = teEl && teEl.value ? new Date(teEl.value).getTime() : null;
 }
 
-function lineMatchesFilters(text) {
+function lineMatchesFilters(text, isoTs) {
   const lower = text.toLowerCase();
   if (filters.text     && !lower.includes(filters.text))                            return false;
   if (filters.proto    && !lower.includes('{' + filters.proto.toLowerCase() + '}')) return false;
@@ -255,25 +289,35 @@ function lineMatchesFilters(text) {
     if (filters.action === 'alert' && !isAlert) return false;
     if (filters.action === 'drop'  && !isDrop)  return false;
   }
+  if (isoTs) {
+    const ts = new Date(isoTs).getTime();
+    if (filters.timeStart && ts < filters.timeStart) return false;
+    if (filters.timeEnd   && ts > filters.timeEnd)   return false;
+  }
   return true;
 }
 
 function applyFilters() {
   getFilters();
   logConsole.querySelectorAll('div[data-raw]').forEach(function(div) {
-    div.style.display = lineMatchesFilters(div.dataset.raw) ? '' : 'none';
+    div.style.display = lineMatchesFilters(div.dataset.raw, div.dataset.ts) ? '' : 'none';
   });
 }
 
-['fText', 'fProto', 'fPriority', 'fAction', 'fIp'].forEach(function(id) {
+['fText', 'fProto', 'fPriority', 'fAction', 'fIp', 'fTimeStart', 'fTimeEnd'].forEach(function(id) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.addEventListener('input',  applyFilters);
   el.addEventListener('change', applyFilters);
 });
 
 document.getElementById('btnResetFilters').addEventListener('click', function() {
-  ['fText', 'fIp'].forEach(function(id)             { document.getElementById(id).value = ''; });
+  ['fText', 'fIp'].forEach(function(id) { document.getElementById(id).value = ''; });
   ['fProto', 'fPriority', 'fAction'].forEach(function(id) { document.getElementById(id).value = ''; });
+  const tsEl = document.getElementById('fTimeStart');
+  const teEl = document.getElementById('fTimeEnd');
+  if (tsEl) tsEl.value = '';
+  if (teEl) teEl.value = '';
   applyFilters();
 });
 
@@ -285,6 +329,35 @@ document.getElementById('btnToggleStats').addEventListener('click', function() {
   panel.classList.toggle('hidden');
   btn.textContent = panel.classList.contains('hidden') ? '▶ Stats' : '◀ Stats';
 });
+
+// ── Alert detail modal ────────────────────────────────────────────────────────
+
+const alertModal      = document.getElementById('alertModal');
+const alertModalClose = document.getElementById('alertModalClose');
+
+function showAlertDetail(parsed) {
+  const fields = [
+    ['Timestamp',       parsed.isoTs ? parsed.isoTs.replace('T', ' ').replace('Z', '') : '—'],
+    ['GID:SID:Rev',     [parsed.gid, parsed.sid, parsed.rev].filter(Boolean).join(':') || '—'],
+    ['Message',         parsed.msg || '—'],
+    ['Classification',  parsed.classification || '—'],
+    ['Priorité',        parsed.priority || '—'],
+    ['Protocole',       parsed.proto || '—'],
+    ['IP Source',       parsed.srcIp ? (parsed.srcIp + (parsed.srcPort ? ':' + parsed.srcPort : '')) : '—'],
+    ['IP Destination',  parsed.dstIp ? (parsed.dstIp + (parsed.dstPort ? ':' + parsed.dstPort : '')) : '—'],
+    ['Action',          parsed.action],
+  ];
+
+  document.getElementById('alertModalContent').innerHTML = fields.map(([k, v]) =>
+    '<div class="bg-gray-800/50 rounded p-2"><span class="text-gray-500 block text-xs mb-0.5">' + k + '</span>' +
+    '<span class="text-gray-100 font-mono break-all">' + String(v).replace(/</g,'&lt;') + '</span></div>'
+  ).join('');
+  document.getElementById('alertModalRaw').textContent = parsed.raw;
+  alertModal.classList.remove('hidden');
+}
+
+alertModalClose.addEventListener('click', () => alertModal.classList.add('hidden'));
+alertModal.addEventListener('click', (e) => { if (e.target === alertModal) alertModal.classList.add('hidden'); });
 
 // ── Socket events ─────────────────────────────────────────────────────────────
 
@@ -304,7 +377,7 @@ socket.on('log:reset', function(data) {
   const msg = data && data.reason ? data.reason : 'Fichier de log réinitialisé.';
   const div = document.createElement('div');
   div.className = 'text-yellow-400 italic py-1 border-t border-yellow-600/30';
-  div.textContent = `⟳ ${msg}`;
+  div.textContent = '⟳ ' + msg;
   logConsole.appendChild(div);
   if (chkAutoscroll.checked) logConsole.scrollTop = logConsole.scrollHeight;
 });
@@ -330,10 +403,12 @@ function appendLine(text, parsed) {
   getFilters();
   const cls = parsed.action === 'drop' ? 'log-drop' : parsed.action === 'alert' ? 'log-alert' : 'log-info';
   const div = document.createElement('div');
-  div.className    = cls;
-  div.dataset.raw  = text;
-  div.innerHTML    = highlightLine(text);
-  div.style.display = lineMatchesFilters(text) ? '' : 'none';
+  div.className     = cls + ' cursor-pointer hover:bg-white/5 rounded px-1';
+  div.dataset.raw   = text;
+  if (parsed.isoTs) div.dataset.ts = parsed.isoTs;
+  div.innerHTML     = highlightLine(text);
+  div.style.display = lineMatchesFilters(text, parsed.isoTs) ? '' : 'none';
+  div.addEventListener('click', function() { showAlertDetail(parsed); });
   logConsole.appendChild(div);
 
   if (chkAutoscroll.checked) logConsole.scrollTop = logConsole.scrollHeight;
@@ -351,24 +426,26 @@ function updateCounters(parsed) {
 
 // ── Controls ──────────────────────────────────────────────────────────────────
 
-btnClear.addEventListener('click', function() {
-  logConsole.innerHTML = '<p class="text-gray-600 italic">Console vidée.</p>';
-  alertCount = 0; dropCount = 0;
-  document.getElementById('cntAlert').textContent = '0 alert';
-  document.getElementById('cntDrop').textContent  = '0 drop';
-  // Reset stats
+function resetStats() {
   stats.perMinute      = {};
   stats.sidCounts      = {};
   stats.ipCounts       = {};
   stats.ipGeo          = {};
   stats.protoCounts    = { TCP: 0, UDP: 0, ICMP: 0, OTHER: 0 };
   stats.priorityCounts = { '1': 0, '2': 0, '3': 0 };
-  renderTopSids();
-  renderTopIps();
-  drawChart();
+}
+
+btnClear.addEventListener('click', function() {
+  logConsole.innerHTML = '<p class="text-gray-600 italic">Console vidée.</p>';
+  alertCount = 0; dropCount = 0;
+  document.getElementById('cntAlert').textContent = '0 alert';
+  document.getElementById('cntDrop').textContent  = '0 drop';
+  resetStats();
+  renderTopSids(); renderTopIps(); drawChart();
 });
 
 btnReload.addEventListener('click', async function() {
+  if (!confirm('Recharger Snort maintenant ?')) return;
   btnReload.disabled = true;
   btnReload.textContent = 'Rechargement…';
   try {
@@ -394,15 +471,17 @@ document.getElementById('btnExportTxt').addEventListener('click', function() {
 });
 
 document.getElementById('btnExportCsv').addEventListener('click', function() {
-  const header = 'timestamp,action,sid,msg,priority,proto,src_ip,dst_ip\n';
+  const header = 'timestamp,action,gid,sid,rev,msg,classification,priority,proto,src_ip,src_port,dst_ip,dst_port\n';
   const rows = Array.from(logConsole.querySelectorAll('div[data-raw]'))
     .filter(function(d) { return d.style.display !== 'none'; })
     .map(function(d) {
       const p = parseLine(d.dataset.raw);
       return [
-        p.timestamp || '', p.action || '', p.sid || '',
+        p.isoTs || '', p.action || '', p.gid || '', p.sid || '', p.rev || '',
         p.msg ? '"' + p.msg.replace(/"/g, '""') + '"' : '',
-        p.priority || '', p.proto || '', p.srcIp || '', p.dstIp || ''
+        p.classification ? '"' + p.classification.replace(/"/g, '""') + '"' : '',
+        p.priority || '', p.proto || '',
+        p.srcIp || '', p.srcPort || '', p.dstIp || '', p.dstPort || ''
       ].join(',');
     }).join('\n');
   downloadBlob(header + rows, 'oinkview-' + timestamp() + '.csv', 'text/csv');
@@ -438,16 +517,9 @@ document.getElementById('btnResetAll').addEventListener('click', async function(
   alertCount = 0; dropCount = 0;
   document.getElementById('cntAlert').textContent = '0 alert';
   document.getElementById('cntDrop').textContent  = '0 drop';
-  stats.perMinute      = {};
-  stats.sidCounts      = {};
-  stats.ipCounts       = {};
-  stats.ipGeo          = {};
-  stats.protoCounts    = { TCP: 0, UDP: 0, ICMP: 0, OTHER: 0 };
-  stats.priorityCounts = { '1': 0, '2': 0, '3': 0 };
-  renderTopSids();
-  renderTopIps();
-  drawChart();
-  showToast('Dashboard réinitialisé — les anciennes alertes sont masquées', 'ok');
+  resetStats();
+  renderTopSids(); renderTopIps(); drawChart();
+  showToast('Dashboard réinitialisé', 'ok');
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────

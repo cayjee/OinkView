@@ -199,7 +199,7 @@ function renderTopIps(ipCounts, geoData) {
   entries = entries.slice(0, 10);
 
   if (!entries.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-gray-600 text-xs">Aucune IP detectee</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-4 text-gray-600 text-xs">Aucune IP detectee</td></tr>';
     return;
   }
 
@@ -208,20 +208,16 @@ function renderTopIps(ipCounts, geoData) {
     var priv    = isPrivateIp(e.ip);
     var country = '—';
     var city    = '—';
-    var flag    = '';
     if (priv) {
-      country = 'Local (prive)';
-    } else if (geo && geo.status === 'success') {
-      country = geo.country || '—';
-      city    = geo.city    || '—';
-      if (geo.countryCode) {
-        flag = '<img src="https://flagcdn.com/16x12/' + geo.countryCode.toLowerCase() + '.png" class="inline w-4 mr-1 align-middle" onerror="this.style.display=\'none\'">';
-      }
+      country = 'Local (privé)';
+    } else if (geo) {
+      country = (geo.countryCode ? '[' + geo.countryCode + '] ' : '') + (geo.country || '—');
+      city    = geo.city || '—';
     }
     return '<tr class="hover:bg-gray-800/50">' +
       '<td class="px-6 py-3 text-gray-500 text-xs">' + (idx + 1) + '</td>' +
       '<td class="px-6 py-3 font-mono text-cyan-400 text-sm">' + e.ip + '</td>' +
-      '<td class="px-6 py-3 text-gray-300 text-sm">' + flag + country + '</td>' +
+      '<td class="px-6 py-3 text-gray-300 text-sm">' + country + '</td>' +
       '<td class="px-6 py-3 text-gray-400 text-sm">' + city + '</td>' +
       '<td class="px-6 py-3 text-right"><span class="px-2 py-0.5 rounded-full bg-gray-800 text-orange-300 text-xs font-mono">' + e.count + '</span></td>' +
       '</tr>';
@@ -234,13 +230,15 @@ async function loadGeo(allIps, ipCounts) {
   var ips = allIps.filter(function(ip) { return !isPrivateIp(ip) && !ipGeoCache[ip]; }).slice(0, 100);
   if (!ips.length) return;
   try {
-    var r    = await fetch('http://ip-api.com/batch?fields=status,country,countryCode,city,query', {
+    var r    = await fetch('/api/geo/batch', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(ips.map(function(ip) { return { query: ip }; }))
+      body:    JSON.stringify({ ips: ips })
     });
     var data = await r.json();
-    data.forEach(function(d) { ipGeoCache[d.query] = d; });
+    if (data.results) {
+      Object.keys(data.results).forEach(function(ip) { ipGeoCache[ip] = data.results[ip]; });
+    }
     renderTopIps(ipCounts, ipGeoCache);
   } catch (_) {}
 }

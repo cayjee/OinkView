@@ -122,6 +122,12 @@
         <option value="alert">alert</option>
         <option value="drop">drop</option>
       </select>
+      <span class="text-gray-600 text-xs">De</span>
+      <input id="fTimeStart" type="datetime-local"
+             class="px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-orange-500"/>
+      <span class="text-gray-600 text-xs">à</span>
+      <input id="fTimeEnd" type="datetime-local"
+             class="px-2 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-200 focus:outline-none focus:border-orange-500"/>
       <button id="btnResetFilters" class="px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs text-gray-300 transition-colors">Réinitialiser</button>
     </div>
 
@@ -164,7 +170,21 @@
   </main>
 
   <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+
+  <!-- Alert detail modal -->
+  <div id="alertModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-2xl w-full mx-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-100">Détail de l'alerte</h3>
+        <button id="alertModalClose" class="text-gray-400 hover:text-gray-100 text-lg">✕</button>
+      </div>
+      <div id="alertModalContent" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
+      <pre id="alertModalRaw" class="bg-gray-950 rounded-lg p-3 text-xs text-orange-200 whitespace-pre-wrap break-all overflow-auto max-h-24"></pre>
+    </div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/auth.js"></script>
   <script src="/js/dashboard.js"></script>
 </body>
 </html>

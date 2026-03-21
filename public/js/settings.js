@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface'];
+const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface', 'authEnabled'];
 
 // ── Load settings on page start ───────────────────────────────────────────────
 
@@ -13,7 +13,9 @@ const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand
     const data = await r.json();
     fields.forEach(key => {
       const el = document.getElementById(key);
-      if (el && data[key] !== undefined) el.value = data[key];
+      if (!el) return;
+      if (el.type === 'checkbox') { el.checked = !!data[key]; }
+      else if (data[key] !== undefined) { el.value = data[key]; }
     });
     updatePermissions();
     updateSnortCommands();
@@ -28,8 +30,14 @@ document.getElementById('btnSave').addEventListener('click', async () => {
   const payload = {};
   fields.forEach(key => {
     const el = document.getElementById(key);
-    if (el) payload[key] = el.type === 'number' ? parseInt(el.value, 10) : el.value;
+    if (!el) return;
+    if (el.type === 'checkbox')    payload[key] = el.checked;
+    else if (el.type === 'number') payload[key] = parseInt(el.value, 10);
+    else                           payload[key] = el.value;
   });
+  // authPassword is optional — only send if filled
+  const pwEl = document.getElementById('authPassword');
+  if (pwEl && pwEl.value.trim()) payload.authPassword = pwEl.value.trim();
 
   try {
     const r    = await fetch('/api/settings', {

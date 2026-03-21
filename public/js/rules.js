@@ -508,7 +508,7 @@ const ACTION_COLORS = {
 
 function renderRules(rules) {
   if (!rules.length) {
-    rulesTbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-600 text-xs">Aucune règle trouvée.</td></tr>';
+    rulesTbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-600 text-xs">Aucune règle trouvée.</td></tr>';
     return;
   }
 
@@ -518,12 +518,16 @@ function renderRules(rules) {
     const sidText    = rule.sid ? `#${rule.sid}` : '—';
     const isLocal    = rule.editable !== false;
     const rawEncoded = encodeURIComponent(rule.raw);
+    const isChecked  = rule.sid && selectedSids.has(rule.sid) ? 'checked' : '';
     const sourceBadge = isLocal
       ? '<span class="px-1.5 py-0.5 rounded bg-blue-900/40 text-blue-300">locale</span>'
       : `<span class="px-1.5 py-0.5 rounded bg-purple-900/40 text-purple-300 truncate max-w-[80px] inline-block" title="${escHtml(rule.filePath || '')}">${escHtml(rule.filePath ? rule.filePath.split('/').pop() : 'communauté')}</span>`;
 
     return `
       <tr class="hover:bg-gray-900/50 transition-colors ${opacity}" data-sid="${rule.sid || ''}">
+        <td class="px-3 py-2.5">
+          ${rule.sid ? `<input type="checkbox" class="rule-chk accent-orange-500" data-sid="${rule.sid}" ${isChecked} onchange="onRuleChkChange(this)"/>` : ''}
+        </td>
         <td class="px-4 py-2.5 font-semibold text-xs ${color}">${rule.action}</td>
         <td class="px-4 py-2.5 text-orange-300 text-xs">${sidText}</td>
         <td class="px-4 py-2.5 text-gray-300 text-xs max-w-xs truncate" title="${escHtml(rule.msg)}">${escHtml(rule.msg)}</td>
@@ -553,6 +557,13 @@ function renderRules(rules) {
       </tr>`;
   }).join('');
 }
+
+window.onRuleChkChange = function(chk) {
+  const sid = chk.dataset.sid;
+  if (chk.checked) selectedSids.add(sid);
+  else             selectedSids.delete(sid);
+  updateBulkToolbar();
+};
 
 // ── Rule actions ──────────────────────────────────────────────────────────────
 
@@ -852,6 +863,7 @@ modalClose.addEventListener('click', () => modal.classList.add('hidden'));
 modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
 
 btnReload.addEventListener('click', async () => {
+  if (!confirm('Recharger Snort maintenant ?')) return;
   btnReload.disabled = true;
   try {
     const r = await fetch('/api/reload', { method: 'POST' });
@@ -860,6 +872,113 @@ btnReload.addEventListener('click', async () => {
   } catch (e) { showToast(`Erreur: ${e.message}`, 'err'); }
   finally { btnReload.disabled = false; }
 });
+
+// ── Validate (test Snort config) ──────────────────────────────────────────────
+
+const validateModal      = document.getElementById('validateModal');
+const validateOutput     = document.getElementById('validateOutput');
+const validateModalClose = document.getElementById('validateModalClose');
+
+validateModalClose.addEventListener('click', () => validateModal.classList.add('hidden'));
+validateModal.addEventListener('click', e => { if (e.target === validateModal) validateModal.classList.add('hidden'); });
+
+document.getElementById('btnValidate').addEventListener('click', async () => {
+  validateOutput.textContent = 'Test en cours…';
+  validateModal.classList.remove('hidden');
+  try {
+    const r = await fetch('/api/rules/validate', { method: 'POST' });
+    const d = await r.json();
+    if (d.success) {
+      validateOutput.className = 'bg-gray-950 rounded-lg p-4 text-xs text-green-300 whitespace-pre-wrap break-all overflow-auto max-h-96';
+      validateOutput.textContent = '✔ Configuration valide\n\n' + (d.output || '');
+    } else {
+      validateOutput.className = 'bg-gray-950 rounded-lg p-4 text-xs text-red-300 whitespace-pre-wrap break-all overflow-auto max-h-96';
+      validateOutput.textContent = '✖ Erreurs détectées\n\n' + (d.output || d.error || '');
+    }
+  } catch (e) {
+    validateOutput.className = 'bg-gray-950 rounded-lg p-4 text-xs text-red-300 whitespace-pre-wrap break-all overflow-auto max-h-96';
+    validateOutput.textContent = `Erreur: ${e.message}`;
+  }
+});
+
+// ── Bulk selection ────────────────────────────────────────────────────────────
+
+let selectedSids = new Set();
+
+function getSelectedLocalSids() {
+  return [...selectedSids].filter(sid => {
+    const rule = mergedRules.find(r => r.sid === sid);
+    return rule && rule.editable !== false;
+  });
+}
+
+function updateBulkToolbar() {
+  const toolbar = document.getElementById('bulkToolbar');
+  const count   = document.getElementById('bulkCount');
+  if (selectedSids.size > 0) {
+    toolbar.classList.remove('hidden');
+    count.textContent = `${selectedSids.size} sélectionnée(s)`;
+  } else {
+    toolbar.classList.add('hidden');
+  }
+}
+
+document.getElementById('chkSelectAll').addEventListener('change', function() {
+  const checkboxes = document.querySelectorAll('.rule-chk');
+  checkboxes.forEach(chk => {
+    chk.checked = this.checked;
+    const sid = chk.dataset.sid;
+    if (this.checked) selectedSids.add(sid);
+    else              selectedSids.delete(sid);
+  });
+  updateBulkToolbar();
+});
+
+document.getElementById('btnBulkCancel').addEventListener('click', () => {
+  selectedSids.clear();
+  document.querySelectorAll('.rule-chk').forEach(chk => chk.checked = false);
+  document.getElementById('chkSelectAll').checked = false;
+  updateBulkToolbar();
+});
+
+document.getElementById('btnBulkEnable').addEventListener('click', async () => {
+  const sids = getSelectedLocalSids();
+  if (!sids.length) return showToast('Aucune règle locale sélectionnée', 'warn');
+  await bulkAction('enable', sids);
+});
+
+document.getElementById('btnBulkDisable').addEventListener('click', async () => {
+  const sids = getSelectedLocalSids();
+  if (!sids.length) return showToast('Aucune règle locale sélectionnée', 'warn');
+  await bulkAction('disable', sids);
+});
+
+document.getElementById('btnBulkDelete').addEventListener('click', async () => {
+  const sids = getSelectedLocalSids();
+  if (!sids.length) return showToast('Aucune règle locale sélectionnée', 'warn');
+  if (!confirm(`Supprimer ${sids.length} règle(s) ? Cette action est irréversible.`)) return;
+  await bulkAction('delete', sids);
+});
+
+async function bulkAction(action, sids) {
+  try {
+    const r = await fetch('/api/rules/bulk', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ action, sids })
+    });
+    const d = await r.json();
+    if (d.success) {
+      showToast(`${d.affected} règle(s) ${action === 'delete' ? 'supprimée(s)' : action === 'enable' ? 'activée(s)' : 'désactivée(s)'}`, 'ok');
+      selectedSids.clear();
+      document.getElementById('chkSelectAll').checked = false;
+      updateBulkToolbar();
+      await loadRules();
+    } else {
+      showToast(`Erreur: ${d.error}`, 'err');
+    }
+  } catch (e) { showToast(`Erreur: ${e.message}`, 'err'); }
+}
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 

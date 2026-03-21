@@ -104,24 +104,44 @@
               </select>
             </div>
           </div>
+          <datalist id="dlIpVars">
+            <option value="any"/>
+            <option value="$HOME_NET"/>
+            <option value="$EXTERNAL_NET"/>
+            <option value="$HTTP_SERVERS"/>
+            <option value="$SQL_SERVERS"/>
+            <option value="$SMTP_SERVERS"/>
+            <option value="$DNS_SERVERS"/>
+            <option value="$TELNET_SERVERS"/>
+            <option value="$AIM_SERVERS"/>
+          </datalist>
+          <datalist id="dlPortVars">
+            <option value="any"/>
+            <option value="$HTTP_PORTS"/>
+            <option value="$SHELLCODE_PORTS"/>
+            <option value="$ORACLE_PORTS"/>
+            <option value="$SSH_PORTS"/>
+            <option value="$FTP_PORTS"/>
+            <option value="$SIP_PORTS"/>
+          </datalist>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="field-label">IP Source</label>
-              <input id="ruleSrcIp" type="text" value="any" placeholder="any / 192.168.1.0/24" class="form-input"/>
+              <input id="ruleSrcIp" type="text" value="any" list="dlIpVars" placeholder="any / 192.168.1.0/24" class="form-input"/>
             </div>
             <div>
               <label class="field-label">Port Source</label>
-              <input id="ruleSrcPort" type="text" value="any" placeholder="any / 80 / [80,443]" class="form-input"/>
+              <input id="ruleSrcPort" type="text" value="any" list="dlPortVars" placeholder="any / 80 / [80,443]" class="form-input"/>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="field-label">IP Destination</label>
-              <input id="ruleDstIp" type="text" value="any" placeholder="any / $HOME_NET" class="form-input"/>
+              <input id="ruleDstIp" type="text" value="any" list="dlIpVars" placeholder="any / $HOME_NET" class="form-input"/>
             </div>
             <div>
               <label class="field-label">Port Destination</label>
-              <input id="ruleDstPort" type="text" value="any" placeholder="any / 22" class="form-input"/>
+              <input id="ruleDstPort" type="text" value="any" list="dlPortVars" placeholder="any / 22" class="form-input"/>
             </div>
           </div>
         </div>
@@ -510,10 +530,16 @@
         <pre id="rulePreview"
              class="bg-gray-950 border border-gray-700 rounded-lg p-3 text-xs text-orange-200 whitespace-pre-wrap break-all leading-relaxed min-h-[56px] max-h-32 overflow-y-auto">
 </pre>
-        <button id="btnSave"
-                class="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
-          Sauvegarder dans <span id="btnSaveFilename">local.rules</span>
-        </button>
+        <div class="flex gap-2">
+          <button id="btnValidate"
+                  class="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm font-medium transition-colors">
+            ✔ Tester config Snort
+          </button>
+          <button id="btnSave"
+                  class="flex-1 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
+            Sauvegarder (<span id="btnSaveFilename">local.rules</span>)
+          </button>
+        </div>
       </div>
     </section>
 
@@ -553,11 +579,23 @@
         </div>
       </div>
 
+      <!-- Bulk actions toolbar -->
+      <div id="bulkToolbar" class="hidden px-6 py-2 border-b border-gray-800 bg-gray-900/80 flex items-center gap-3">
+        <span id="bulkCount" class="text-xs text-gray-400">0 sélectionnée(s)</span>
+        <button id="btnBulkEnable"  class="px-3 py-1 rounded bg-green-900/50 hover:bg-green-900 text-green-300 text-xs transition-colors">▶ Activer</button>
+        <button id="btnBulkDisable" class="px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 text-gray-300 text-xs transition-colors">⏸ Désactiver</button>
+        <button id="btnBulkDelete"  class="px-3 py-1 rounded bg-red-900/50 hover:bg-red-900 text-red-300 text-xs transition-colors">✕ Supprimer</button>
+        <button id="btnBulkCancel" class="ml-auto px-3 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-400 text-xs transition-colors">Annuler</button>
+      </div>
+
       <!-- Table -->
       <div class="flex-1 overflow-y-auto">
         <table class="w-full text-sm border-collapse">
           <thead class="sticky top-0 bg-gray-900 text-xs text-gray-500 uppercase tracking-wider">
             <tr>
+              <th class="px-3 py-2 text-left w-8">
+                <input type="checkbox" id="chkSelectAll" class="accent-orange-500" title="Tout sélectionner"/>
+              </th>
               <th class="px-4 py-2 text-left">Action</th>
               <th class="px-4 py-2 text-left">SID</th>
               <th class="px-4 py-2 text-left">Message</th>
@@ -567,7 +605,7 @@
             </tr>
           </thead>
           <tbody id="rulesTbody" class="divide-y divide-gray-800/60">
-            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-600 text-xs">Chargement des règles…</td></tr>
+            <tr><td colspan="7" class="px-4 py-8 text-center text-gray-600 text-xs">Chargement des règles…</td></tr>
           </tbody>
         </table>
       </div>
@@ -577,6 +615,17 @@
 
   <!-- Toast -->
   <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+
+  <!-- Validate modal -->
+  <div id="validateModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-2xl w-full mx-4">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="font-semibold text-gray-100">Test configuration Snort</h3>
+        <button id="validateModalClose" class="text-gray-400 hover:text-gray-100">✕</button>
+      </div>
+      <pre id="validateOutput" class="bg-gray-950 rounded-lg p-4 text-xs text-green-200 whitespace-pre-wrap break-all overflow-auto max-h-96">En cours…</pre>
+    </div>
+  </div>
 
   <!-- Raw rule modal -->
   <div id="modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
@@ -589,6 +638,7 @@
     </div>
   </div>
 
+  <script src="/js/auth.js"></script>
   <script src="/js/rules.js"></script>
 </body>
 </html>

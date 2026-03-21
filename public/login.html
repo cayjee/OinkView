@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OinkView — Connexion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { mono: ['JetBrains Mono','monospace'] } } } }</script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/style.css"/>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <span class="text-orange-400 font-semibold text-3xl tracking-wide">🐗 OinkView</span>
+      <p class="text-gray-500 text-sm mt-2">Snort 3 Manager</p>
+    </div>
+
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-5">
+      <h1 class="text-lg font-semibold text-center">Connexion</h1>
+
+      <div id="errorMsg" class="hidden bg-red-900/40 border border-red-700 rounded-lg px-4 py-2 text-red-300 text-sm"></div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="field-label">Mot de passe</label>
+          <input id="password" type="password" class="form-input" placeholder="••••••••" autocomplete="current-password" autofocus/>
+        </div>
+        <button type="submit"
+                class="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
+          Se connecter
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+      const errEl    = document.getElementById('errorMsg');
+      errEl.classList.add('hidden');
+      try {
+        const r    = await fetch('/api/auth/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ password })
+        });
+        const data = await r.json();
+        if (data.ok) {
+          localStorage.setItem('oinkview_token', data.token || '');
+          window.location.href = '/';
+        } else {
+          errEl.textContent = data.error || 'Mot de passe incorrect';
+          errEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        errEl.textContent = 'Erreur de connexion : ' + err.message;
+        errEl.classList.remove('hidden');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -7,16 +7,21 @@
 
 const express  = require('express');
 const http     = require('http');
+const crypto   = require('crypto');
 const { Server } = require('socket.io');
 const fs       = require('fs');
 const path     = require('path');
 const { exec } = require('child_process');
 const chokidar = require('chokidar');
+const geoip    = require('geoip-lite');
 
 // ─── État global ─────────────────────────────────────────────────────────────
 
 let dashResetTime  = 0; // timestamp ms — filtre les lignes du dashboard
 let statsResetTime = 0; // timestamp ms — filtre les stats
+
+// ─── Sessions auth ────────────────────────────────────────────────────────────
+const sessions = new Set(); // tokens actifs en mémoire
 
 // Parse le timestamp Snort "MM/DD-HH:MM:SS.usec" → ms epoch (année courante)
 function parseSnortTs(line) {
@@ -50,7 +55,9 @@ const DEFAULT_SETTINGS = {
   communityRulesDir:  '',
   tailLines:          200,
   snortBin:           '/usr/local/bin/snort',
-  snortInterface:     'eth0'
+  snortInterface:     'eth0',
+  authEnabled:        false,
+  authPassword:       ''
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -123,14 +130,57 @@ function nextSid(content) {
   return max + 1;
 }
 
+// ─── Auth helpers ─────────────────────────────────────────────────────────────
+
+function authMiddleware(req, res, next) {
+  const settings = loadSettings();
+  if (!settings.authEnabled) return next();
+  // Allow login endpoint without token
+  if (req.path === '/api/auth/login' || req.path === '/api/auth/check') return next();
+  const token = req.headers['x-auth-token'] || '';
+  if (!token || !sessions.has(token)) return res.status(401).json({ error: 'Non autorisé' });
+  next();
+}
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api', authMiddleware);
+
+// ─── API — Auth ───────────────────────────────────────────────────────────────
+
+app.get('/api/auth/check', (req, res) => {
+  const settings = loadSettings();
+  if (!settings.authEnabled) return res.json({ authRequired: false, ok: true });
+  const token = req.headers['x-auth-token'] || '';
+  res.json({ authRequired: true, ok: sessions.has(token) });
+});
+
+app.post('/api/auth/login', (req, res) => {
+  const settings = loadSettings();
+  if (!settings.authEnabled) return res.json({ ok: true, token: '' });
+  const { password } = req.body;
+  if (password !== settings.authPassword) return res.status(401).json({ error: 'Mot de passe incorrect' });
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.add(token);
+  res.json({ ok: true, token });
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  const token = req.headers['x-auth-token'] || '';
+  sessions.delete(token);
+  res.json({ ok: true });
+});
 
 // ─── API — Settings ───────────────────────────────────────────────────────────
 
-app.get('/api/settings', (_req, res) => res.json(loadSettings()));
+app.get('/api/settings', (_req, res) => {
+  const s = loadSettings();
+  const safe = { ...s };
+  if (safe.authPassword) safe.authPassword = ''; // never send password to client
+  res.json(safe);
+});
 
 app.post('/api/settings', (req, res) => {
   try {
@@ -500,6 +550,70 @@ app.get('/api/snort/config-raw', (_req, res) => {
   }
 });
 
+// ─── API — Géolocalisation locale (geoip-lite, aucune requête internet) ───────
+
+app.post('/api/geo/batch', (req, res) => {
+  const { ips } = req.body;
+  if (!Array.isArray(ips)) return res.status(400).json({ error: 'ips array required' });
+  const results = {};
+  ips.forEach(ip => {
+    const geo = geoip.lookup(ip);
+    if (geo) {
+      results[ip] = {
+        country:     geo.country || '',
+        countryCode: geo.country || '',
+        city:        geo.city    || '',
+        region:      geo.region  || ''
+      };
+    }
+  });
+  res.json({ results });
+});
+
+// ─── API — Validation config Snort ────────────────────────────────────────────
+
+app.post('/api/rules/validate', (_req, res) => {
+  const { snortBin, snortConfig } = loadSettings();
+  if (!snortBin || !snortConfig)
+    return res.status(400).json({ ok: false, output: 'snortBin ou snortConfig non configuré dans les Paramètres.' });
+  exec(`${snortBin} -c ${snortConfig} -T 2>&1`, { timeout: 30000 }, (error, stdout, stderr) => {
+    const output = (stdout + stderr).trim();
+    res.json({ ok: !error, output });
+  });
+});
+
+// ─── API — Opérations bulk sur les règles ─────────────────────────────────────
+
+app.post('/api/rules/bulk', (req, res) => {
+  const { rulesFile } = loadSettings();
+  const { action, sids } = req.body;
+  if (!action || !Array.isArray(sids) || !sids.length)
+    return res.status(400).json({ error: 'action et sids requis' });
+  try {
+    let content = fs.readFileSync(rulesFile, 'utf8');
+    if (action === 'delete') {
+      const lines = content.split('\n').filter(line =>
+        !sids.some(sid => line.match(new RegExp(`\\bsid\\s*:\\s*${sid}\\s*;`)))
+      );
+      content = lines.join('\n');
+    } else {
+      sids.forEach(sid => {
+        const re = new RegExp(`(^|\\n)(#?\\s*(?:alert|drop|pass|reject|rewrite)[^\\n]*\\bsid\\s*:\\s*${sid}\\s*;[^\\n]*)`, 'g');
+        content = content.replace(re, (_full, pre, line) => {
+          const isDisabled = line.trimStart().startsWith('#');
+          if (action === 'enable'  && isDisabled)  return pre + line.replace(/^(\s*)#\s?/, '$1');
+          if (action === 'disable' && !isDisabled) return pre + '# ' + line;
+          return _full;
+        });
+      });
+    }
+    fs.writeFileSync(rulesFile, content);
+    res.json({ success: true, count: sids.length });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ─── API — Reset dashboard / stats ───────────────────────────────────────────
 
 app.post('/api/reset/dashboard', (_req, res) => {
@@ -567,7 +681,15 @@ app.get('/api/stats', (_req, res) => {
   }
 });
 
-// ─── WebSocket — Real-time log streaming ─────────────────────────────────────
+// ─── WebSocket — Auth + Real-time log streaming ──────────────────────────────
+
+io.use((socket, next) => {
+  const settings = loadSettings();
+  if (!settings.authEnabled) return next();
+  const token = socket.handshake.auth.token || '';
+  if (!token || !sessions.has(token)) return next(new Error('Unauthorized'));
+  next();
+});
 
 io.on('connection', (socket) => {
   const settings = loadSettings();
