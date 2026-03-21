@@ -10,108 +10,82 @@
   </script>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/style.css"/>
+  <style>
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary .arrow { transition: transform 0.15s; }
+    details[open] > summary .arrow { transform: rotate(90deg); }
+  </style>
 </head>
 <body class="bg-gray-950 text-gray-100 h-screen flex overflow-hidden">
 
-  <!-- Sidebar (shared) -->
+  <!-- Sidebar -->
   <nav class="w-56 shrink-0 bg-gray-900 border-r border-gray-800 flex flex-col">
     <div class="px-5 py-5 border-b border-gray-800">
       <span class="text-orange-400 font-semibold text-lg tracking-wide">🐗 OinkView</span>
       <p class="text-xs text-gray-500 mt-0.5">Snort 3 Manager</p>
     </div>
     <ul class="flex-1 py-4 space-y-1 px-2">
-      <li>
-        <a href="index.html"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-          </svg>
-          Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="overview.html"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
-          Vue Globale
-        </a>
-      </li>
-      <li>
-        <a href="rules.html"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-          </svg>
-          Règles
-        </a>
-      </li>
-      <li>
-        <a href="stats.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-          Statistiques
-        </a>
-      </li>
-      <li>
-        <a href="settings.html"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          Paramètres
-        </a>
-      </li>
+      <li><a href="index.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Dashboard</a></li>
+      <li><a href="overview.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 0v10m0-10a2 2 0 012 2h2a2 2 0 012-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/></svg>
+        Vue Globale</a></li>
+      <li><a href="rules.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 text-orange-300 font-medium text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Règles</a></li>
+      <li><a href="stats.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        Statistiques</a></li>
+      <li><a href="settings.html" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-gray-100 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Paramètres</a></li>
     </ul>
     <div class="p-3 border-t border-gray-800">
-      <button id="btnReload"
-              class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-        </svg>
+      <button id="btnReload" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         Reload Snort
       </button>
     </div>
   </nav>
 
-  <!-- Main content: split between builder (left) and rules list (right) -->
+  <!-- Main -->
   <main class="flex-1 flex gap-0 overflow-hidden min-h-0">
 
     <!-- ── Rule Builder Panel ── -->
-    <section class="w-[480px] shrink-0 flex flex-col border-r border-gray-800 overflow-hidden min-h-0 h-full">
+    <section class="w-[520px] shrink-0 flex flex-col border-r border-gray-800 overflow-hidden min-h-0 h-full">
       <header class="px-6 py-4 border-b border-gray-800 bg-gray-900 shrink-0">
         <h1 class="text-lg font-semibold">Générateur de Règles</h1>
-        <p class="text-xs text-gray-500 mt-0.5">Syntaxe Snort 3 — local SID ≥ 1 000 001</p>
+        <p class="text-xs text-gray-500 mt-0.5">Syntaxe Snort 3 complète — SID local ≥ 1 000 001</p>
       </header>
 
-      <div class="p-6 space-y-5 flex-1 overflow-y-auto">
+      <div class="p-5 space-y-4 flex-1 overflow-y-auto">
 
-        <!-- Rule Type -->
-        <div>
-          <label class="field-label">Type de règle</label>
-          <select id="ruleType" class="form-select">
-            <option value="traditional">Traditional Rule  (action proto src dst)</option>
-            <option value="service">Service Rule  (action service)</option>
-            <option value="file">File Rule  (action file)</option>
-          </select>
+        <!-- ── Type / Action ── -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="field-label">Type de règle</label>
+            <select id="ruleType" class="form-select">
+              <option value="traditional">Traditional</option>
+              <option value="service">Service</option>
+              <option value="file">File</option>
+            </select>
+          </div>
+          <div>
+            <label class="field-label">Action</label>
+            <select id="ruleAction" class="form-select">
+              <option value="alert">alert</option>
+              <option value="drop">drop</option>
+              <option value="pass">pass</option>
+              <option value="reject">reject</option>
+              <option value="rewrite">rewrite</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Action -->
-        <div>
-          <label class="field-label">Action</label>
-          <select id="ruleAction" class="form-select">
-            <option value="alert">alert</option>
-            <option value="drop">drop</option>
-            <option value="pass">pass</option>
-            <option value="reject">reject</option>
-          </select>
-        </div>
-
-        <!-- Traditional fields: proto + IPs + ports -->
-        <div id="traditionalFields" class="space-y-4">
+        <!-- ── Traditional fields ── -->
+        <div id="traditionalFields" class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="field-label">Protocole</label>
@@ -125,8 +99,8 @@
             <div>
               <label class="field-label">Direction</label>
               <select id="ruleDir" class="form-select">
-                <option value="->">→  (unidirectionnel)</option>
-                <option value="<>">↔  (bidirectionnel)</option>
+                <option value="->">→ unidirectionnel</option>
+                <option value="<>">↔ bidirectionnel</option>
               </select>
             </div>
           </div>
@@ -147,12 +121,12 @@
             </div>
             <div>
               <label class="field-label">Port Destination</label>
-              <input id="ruleDstPort" type="text" value="any" placeholder="any / 22 / [21,22,23]" class="form-input"/>
+              <input id="ruleDstPort" type="text" value="any" placeholder="any / 22" class="form-input"/>
             </div>
           </div>
         </div>
 
-        <!-- Service field (hidden by default) -->
+        <!-- ── Service field ── -->
         <div id="serviceField" class="hidden">
           <label class="field-label">Service</label>
           <select id="ruleService" class="form-select">
@@ -164,65 +138,354 @@
             <option value="dns">dns</option>
             <option value="dce_http_proxy">dce_http_proxy</option>
             <option value="dce_http_server">dce_http_server</option>
+            <option value="sip">sip</option>
+            <option value="imap">imap</option>
+            <option value="pop3">pop3</option>
+            <option value="telnet">telnet</option>
+            <option value="dcerpc">dcerpc</option>
+            <option value="netbios-ssn">netbios-ssn</option>
           </select>
         </div>
 
         <hr class="border-gray-800"/>
 
-        <!-- Rule Options -->
+        <!-- ── msg ── -->
         <div>
-          <label class="field-label">Message (msg)</label>
-          <input id="ruleMsg" type="text" placeholder='ex: "Suspicious HTTP GET /admin"' class="form-input"/>
+          <label class="field-label">Message <span class="text-red-400">*</span></label>
+          <input id="ruleMsg" type="text" placeholder='Description de l&apos;alerte' class="form-input"/>
         </div>
 
-        <!-- Payload Options -->
-        <div class="space-y-3">
-          <p class="field-label">Payload Detection (optionnel)</p>
+        <!-- ── SECTION: Métadonnées ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden">
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Métadonnées
+            <span class="ml-auto text-xs text-gray-600" id="metaBadge"></span>
+          </summary>
+          <div class="px-4 py-3 space-y-3 bg-gray-900/30">
 
-          <!-- Sticky buffer -->
-          <div class="grid grid-cols-2 gap-3">
+            <!-- classtype -->
             <div>
-              <label class="field-label text-gray-500">Sticky Buffer</label>
-              <select id="ruleBuffer" class="form-select text-gray-300">
+              <label class="field-label text-gray-400">classtype</label>
+              <select id="ruleClasstype" class="form-select">
                 <option value="">— aucun —</option>
-                <option value="http_uri">http_uri</option>
-                <option value="http_header">http_header</option>
-                <option value="http_method">http_method</option>
-                <option value="http_client_body">http_client_body</option>
-                <option value="http_raw_uri">http_raw_uri</option>
-                <option value="file_data">file_data</option>
-                <option value="pkt_data">pkt_data</option>
+                <option value="attempted-admin">attempted-admin</option>
+                <option value="attempted-user">attempted-user</option>
+                <option value="policy-violation">policy-violation</option>
+                <option value="shellcode-detect">shellcode-detect</option>
+                <option value="successful-admin">successful-admin</option>
+                <option value="successful-user">successful-user</option>
+                <option value="trojan-activity">trojan-activity</option>
+                <option value="unsuccessful-user">unsuccessful-user</option>
+                <option value="web-application-attack">web-application-attack</option>
+                <option value="web-application-activity">web-application-activity</option>
+                <option value="network-scan">network-scan</option>
+                <option value="denial-of-service">denial-of-service</option>
+                <option value="non-standard-protocol">non-standard-protocol</option>
+                <option value="protocol-command-decode">protocol-command-decode</option>
+                <option value="string-detect">string-detect</option>
+                <option value="suspicious-filename-detect">suspicious-filename-detect</option>
+                <option value="suspicious-login">suspicious-login</option>
+                <option value="system-call-detect">system-call-detect</option>
+                <option value="tcp-connection">tcp-connection</option>
+                <option value="unusual-client-port-connection">unusual-client-port-connection</option>
+                <option value="network-scan">network-scan</option>
+                <option value="bad-unknown">bad-unknown</option>
+                <option value="default-login-attempt">default-login-attempt</option>
+                <option value="misc-activity">misc-activity</option>
+                <option value="misc-attack">misc-attack</option>
+                <option value="icmp-event">icmp-event</option>
+                <option value="inappropriate-content">inappropriate-content</option>
+                <option value="unknown">unknown</option>
               </select>
             </div>
+
+            <!-- priority -->
             <div>
-              <label class="field-label text-gray-500">Content</label>
-              <input id="ruleContent" type="text" placeholder='ex: "/admin.php"' class="form-input"/>
+              <label class="field-label text-gray-400">priority</label>
+              <input id="rulePriority" type="number" min="1" max="255" placeholder="1 = haute, 3 = basse" class="form-input"/>
             </div>
+
+            <!-- reference -->
+            <div>
+              <label class="field-label text-gray-400">reference</label>
+              <div class="flex gap-2">
+                <select id="ruleRefType" class="form-select w-28 shrink-0">
+                  <option value="cve">cve</option>
+                  <option value="url">url</option>
+                  <option value="bugtraq">bugtraq</option>
+                  <option value="arachnids">arachnids</option>
+                  <option value="nessus">nessus</option>
+                  <option value="mcafee">mcafee</option>
+                  <option value="osvdb">osvdb</option>
+                  <option value="msb">msb</option>
+                </select>
+                <input id="ruleRefId" type="text" placeholder="ex: 2021-44228" class="form-input flex-1"/>
+              </div>
+            </div>
+
+            <!-- metadata -->
+            <div>
+              <label class="field-label text-gray-400">metadata</label>
+              <input id="ruleMetadata" type="text" placeholder='ex: affected_product Web_Server, created_at 2024' class="form-input"/>
+            </div>
+
           </div>
+        </details>
 
-          <!-- Modificateurs -->
-          <div class="flex gap-4">
-            <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-              <input type="checkbox" id="modNocase" class="accent-orange-500"/> nocase
-            </label>
-            <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-              <input type="checkbox" id="modFastPattern" class="accent-orange-500"/> fast_pattern
-            </label>
+        <!-- ── SECTION: Flow ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden">
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Flow
+            <span class="ml-auto text-xs text-gray-600" id="flowBadge"></span>
+          </summary>
+          <div class="px-4 py-3 bg-gray-900/30">
+            <select id="ruleFlow" class="form-select">
+              <option value="">— aucun —</option>
+              <option value="flow:to_server,established;">to_server, established</option>
+              <option value="flow:to_client,established;">to_client, established</option>
+              <option value="flow:from_client,established;">from_client, established</option>
+              <option value="flow:from_server,established;">from_server, established</option>
+              <option value="flow:to_server,not_established;">to_server, not_established</option>
+              <option value="flow:to_client,not_established;">to_client, not_established</option>
+              <option value="flow:stateless;">stateless</option>
+              <option value="flow:established;">established</option>
+              <option value="flow:not_established;">not_established</option>
+              <option value="flow:to_server,no_stream;">to_server, no_stream</option>
+              <option value="flow:to_server,only_stream;">to_server, only_stream</option>
+            </select>
           </div>
-        </div>
+        </details>
 
-        <!-- Flow option -->
-        <div>
-          <label class="field-label">Flow (optionnel)</label>
-          <select id="ruleFlow" class="form-select">
-            <option value="">— aucun —</option>
-            <option value="flow:to_server,established;">to_server,established</option>
-            <option value="flow:to_client,established;">to_client,established</option>
-            <option value="flow:stateless;">stateless</option>
-          </select>
-        </div>
+        <!-- ── SECTION: Payload Detection ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden" open>
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Payload Detection
+            <span class="ml-auto text-xs text-gray-600" id="payloadBadge"></span>
+          </summary>
+          <div class="px-4 py-3 space-y-3 bg-gray-900/30">
 
-        <!-- SID / Rev -->
+            <!-- Content entries (dynamic) -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="field-label text-gray-400 mb-0">content / buffer</label>
+                <button id="btnAddContent" type="button"
+                        class="px-2.5 py-1 rounded bg-gray-700 hover:bg-gray-600 text-xs text-gray-300 transition-colors">
+                  + Ajouter content
+                </button>
+              </div>
+              <div id="contentEntriesContainer" class="space-y-2"></div>
+            </div>
+
+            <!-- PCRE -->
+            <div>
+              <label class="field-label text-gray-400">pcre</label>
+              <input id="rulePcre" type="text" placeholder='ex: /^GET\s+\/admin/i' class="form-input font-mono"/>
+              <p class="text-xs text-gray-600 mt-0.5">Perl-Compatible Regular Expression — inclure les délimiteurs /…/flags</p>
+            </div>
+
+          </div>
+        </details>
+
+        <!-- ── SECTION: Détection réseau ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden">
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Détection réseau (flags, ICMP, IP)
+            <span class="ml-auto text-xs text-gray-600" id="netBadge"></span>
+          </summary>
+          <div class="px-4 py-3 space-y-4 bg-gray-900/30">
+
+            <!-- TCP Flags -->
+            <div id="tcpFlagsSection">
+              <label class="field-label text-gray-400">flags TCP</label>
+              <div class="flex gap-3 flex-wrap text-xs text-gray-300 mb-2">
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagS" class="accent-orange-500"> S (SYN)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagA" class="accent-orange-500"> A (ACK)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagF" class="accent-orange-500"> F (FIN)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagR" class="accent-orange-500"> R (RST)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagP" class="accent-orange-500"> P (PSH)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagU" class="accent-orange-500"> U (URG)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagC" class="accent-orange-500"> C (CWR)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="flagE" class="accent-orange-500"> E (ECE)</label>
+              </div>
+              <div class="flex gap-2 items-center">
+                <label class="text-xs text-gray-500">Modificateur :</label>
+                <select id="flagsMod" class="form-select text-xs w-auto">
+                  <option value="">+ (au moins ces flags)</option>
+                  <option value="!">! (aucun de ces flags)</option>
+                  <option value="*">* (au moins un de ces flags)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- ICMP -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="field-label text-gray-400">itype (ICMP)</label>
+                <input id="ruleItype" type="text" placeholder="ex: 8 (echo request)" class="form-input"/>
+              </div>
+              <div>
+                <label class="field-label text-gray-400">icode (ICMP)</label>
+                <input id="ruleIcode" type="text" placeholder="ex: 0" class="form-input"/>
+              </div>
+            </div>
+
+            <!-- dsize -->
+            <div>
+              <label class="field-label text-gray-400">dsize</label>
+              <input id="ruleDsize" type="text" placeholder="ex: >100 ou 100&lt;>200" class="form-input"/>
+              <p class="text-xs text-gray-600 mt-0.5">Taille du payload (octets)</p>
+            </div>
+
+            <!-- TTL / TOS / ID -->
+            <div class="grid grid-cols-3 gap-2">
+              <div>
+                <label class="field-label text-gray-400">ttl</label>
+                <input id="ruleTtl" type="text" placeholder="ex: &lt;64" class="form-input"/>
+              </div>
+              <div>
+                <label class="field-label text-gray-400">tos</label>
+                <input id="ruleTos" type="text" placeholder="ex: 16" class="form-input"/>
+              </div>
+              <div>
+                <label class="field-label text-gray-400">id (IP)</label>
+                <input id="ruleIpId" type="text" placeholder="ex: 31337" class="form-input"/>
+              </div>
+            </div>
+
+            <!-- fragbits -->
+            <div>
+              <label class="field-label text-gray-400">fragbits</label>
+              <div class="flex gap-4 text-xs text-gray-300 mb-2">
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="fragM" class="accent-orange-500"> M (More Fragments)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="fragD" class="accent-orange-500"> D (Don't Fragment)</label>
+                <label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" id="fragR" class="accent-orange-500"> R (Reserved)</label>
+              </div>
+              <select id="fragMod" class="form-select text-xs w-auto">
+                <option value="">+ (au moins ces bits)</option>
+                <option value="!">! (aucun de ces bits)</option>
+                <option value="*">* (au moins un)</option>
+              </select>
+            </div>
+
+            <!-- window -->
+            <div>
+              <label class="field-label text-gray-400">window (TCP)</label>
+              <input id="ruleWindow" type="text" placeholder="ex: 1024" class="form-input"/>
+            </div>
+
+            <!-- ip_proto -->
+            <div>
+              <label class="field-label text-gray-400">ip_proto</label>
+              <input id="ruleIpProto" type="text" placeholder="ex: !6 (pas TCP)" class="form-input"/>
+            </div>
+
+          </div>
+        </details>
+
+        <!-- ── SECTION: Opérations Byte ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden">
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Opérations Byte
+            <span class="ml-auto text-xs text-gray-600" id="byteBadge"></span>
+          </summary>
+          <div class="px-4 py-3 space-y-3 bg-gray-900/30">
+
+            <div>
+              <label class="field-label text-gray-400">byte_test</label>
+              <input id="ruleByteTest" type="text" placeholder="4,=,0x80000000,0,big" class="form-input font-mono"/>
+              <p class="text-xs text-gray-600 mt-0.5">Format: bytes, op (=,!=,&lt;,>,&lt;=,>=,&), value, offset [,endian] [,string] [,relative]</p>
+            </div>
+
+            <div>
+              <label class="field-label text-gray-400">byte_jump</label>
+              <input id="ruleByteJump" type="text" placeholder="4,0,relative,little" class="form-input font-mono"/>
+              <p class="text-xs text-gray-600 mt-0.5">Format: bytes, offset [,relative] [,big/little] [,align] [,from_beginning] [,from_end] [,post_offset N] [,dce]</p>
+            </div>
+
+            <div>
+              <label class="field-label text-gray-400">byte_extract</label>
+              <input id="ruleByteExtract" type="text" placeholder="2,0,var_name" class="form-input font-mono"/>
+              <p class="text-xs text-gray-600 mt-0.5">Format: bytes, offset, name [,relative] [,multiplier N] [,big/little] [,string] [,hex/dec/oct] [,align]</p>
+            </div>
+
+            <div>
+              <label class="field-label text-gray-400">byte_math</label>
+              <input id="ruleByteMath" type="text" placeholder="4,0,+,2,result,big" class="form-input font-mono"/>
+              <p class="text-xs text-gray-600 mt-0.5">Format: bytes, offset, op (+,-,*,/,&lt;&lt;,>>), rvalue, result [,endian] [,string] [,relative] [,dce]</p>
+            </div>
+
+          </div>
+        </details>
+
+        <!-- ── SECTION: Rate Limiting ── -->
+        <details class="border border-gray-800 rounded-lg overflow-hidden">
+          <summary class="flex items-center gap-2 px-4 py-2.5 bg-gray-900 cursor-pointer text-sm font-medium text-gray-300 hover:text-white select-none">
+            <span class="arrow text-gray-500 text-xs">▶</span>
+            Rate Limiting
+            <span class="ml-auto text-xs text-gray-600" id="rateBadge"></span>
+          </summary>
+          <div class="px-4 py-3 space-y-4 bg-gray-900/30">
+
+            <!-- threshold -->
+            <div>
+              <label class="field-label text-gray-400">threshold</label>
+              <div class="grid grid-cols-2 gap-2 mb-1">
+                <select id="threshType" class="form-select text-xs">
+                  <option value="">— désactivé —</option>
+                  <option value="limit">limit (max N alertes)</option>
+                  <option value="threshold">threshold (1 alerte / N occurrences)</option>
+                  <option value="both">both (limit + threshold)</option>
+                </select>
+                <select id="threshTrack" class="form-select text-xs">
+                  <option value="by_src">by_src</option>
+                  <option value="by_dst">by_dst</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs text-gray-500">count</label>
+                  <input id="threshCount" type="number" min="1" placeholder="ex: 5" class="form-input text-xs"/>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500">seconds</label>
+                  <input id="threshSeconds" type="number" min="1" placeholder="ex: 60" class="form-input text-xs"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- detection_filter -->
+            <div>
+              <label class="field-label text-gray-400">detection_filter</label>
+              <div class="grid grid-cols-2 gap-2 mb-1">
+                <select id="dfTrack" class="form-select text-xs">
+                  <option value="">— désactivé —</option>
+                  <option value="by_src">by_src</option>
+                  <option value="by_dst">by_dst</option>
+                </select>
+                <div></div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-xs text-gray-500">count</label>
+                  <input id="dfCount" type="number" min="1" placeholder="ex: 10" class="form-input text-xs"/>
+                </div>
+                <div>
+                  <label class="text-xs text-gray-500">seconds</label>
+                  <input id="dfSeconds" type="number" min="1" placeholder="ex: 1" class="form-input text-xs"/>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </details>
+
+        <!-- ── SID / Rev / rem ── -->
+        <hr class="border-gray-800"/>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="field-label">SID (auto)</label>
@@ -234,19 +497,18 @@
           </div>
         </div>
 
-        <!-- Remark -->
         <div>
-          <label class="field-label">Commentaire (rem — optionnel)</label>
-          <input id="ruleRem" type="text" placeholder='ex: "Ajoutée le 2026-03-20 — ticket #42"' class="form-input"/>
+          <label class="field-label">Commentaire rem (optionnel)</label>
+          <input id="ruleRem" type="text" placeholder='ex: "ticket #42 — 2026-03-21"' class="form-input"/>
         </div>
 
       </div><!-- /form body -->
 
-      <!-- Live preview + save -->
+      <!-- Preview + save -->
       <div class="p-4 border-t border-gray-800 bg-gray-900 space-y-3 shrink-0">
         <p class="text-xs text-gray-500 uppercase tracking-widest">Aperçu en temps réel</p>
         <pre id="rulePreview"
-             class="bg-gray-950 border border-gray-700 rounded-lg p-3 text-xs text-orange-200 whitespace-pre-wrap break-all leading-relaxed min-h-[56px]">
+             class="bg-gray-950 border border-gray-700 rounded-lg p-3 text-xs text-orange-200 whitespace-pre-wrap break-all leading-relaxed min-h-[56px] max-h-32 overflow-y-auto">
 </pre>
         <button id="btnSave"
                 class="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-sm font-semibold transition-colors">
@@ -262,8 +524,7 @@
           <h2 class="text-lg font-semibold">Règles actives</h2>
           <p class="text-xs text-gray-500 mt-0.5" id="rulesCount">Chargement…</p>
         </div>
-        <button id="btnRefreshRules"
-                class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors">
+        <button id="btnRefreshRules" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors">
           Rafraîchir
         </button>
       </header>
@@ -273,24 +534,20 @@
         <div class="flex gap-3">
           <input id="searchRules" type="text" placeholder="Rechercher par SID, msg, action…"
                  class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors"/>
-          <select id="filterSource"
-                  class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
+          <select id="filterSource" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
             <option value="all">Toutes les règles</option>
             <option value="local">Locales uniquement</option>
             <option value="community">Communautaires uniquement</option>
           </select>
         </div>
         <div class="flex gap-3">
-          <select id="filterCategory"
-                  class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
-            <option value="">— Toutes les catégories (msg) —</option>
+          <select id="filterCategory" class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
+            <option value="">— Toutes les catégories —</option>
           </select>
-          <select id="filterClasstype"
-                  class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
+          <select id="filterClasstype" class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
             <option value="">— Tous les classtypes —</option>
           </select>
-          <button id="btnResetFilters"
-                  class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-400 transition-colors whitespace-nowrap">
+          <button id="btnResetFilters" class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-400 transition-colors whitespace-nowrap">
             Réinitialiser
           </button>
         </div>
@@ -310,9 +567,7 @@
             </tr>
           </thead>
           <tbody id="rulesTbody" class="divide-y divide-gray-800/60">
-            <tr>
-              <td colspan="5" class="px-4 py-8 text-center text-gray-600 text-xs">Chargement des règles…</td>
-            </tr>
+            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-600 text-xs">Chargement des règles…</td></tr>
           </tbody>
         </table>
       </div>
@@ -330,9 +585,7 @@
         <h3 class="font-semibold text-gray-100">Règle brute</h3>
         <button id="modalClose" class="text-gray-400 hover:text-gray-100">✕</button>
       </div>
-      <pre id="modalContent"
-           class="bg-gray-950 rounded-lg p-4 text-xs text-orange-200 whitespace-pre-wrap break-all overflow-auto max-h-64">
-      </pre>
+      <pre id="modalContent" class="bg-gray-950 rounded-lg p-4 text-xs text-orange-200 whitespace-pre-wrap break-all overflow-auto max-h-64"></pre>
     </div>
   </div>
 

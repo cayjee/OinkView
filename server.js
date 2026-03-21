@@ -679,6 +679,24 @@ io.on('connection', (socket) => {
     } catch (_) {}
   });
 
+  // Log file deleted (Snort restart / rotation)
+  watcher.on('unlink', () => {
+    currentSize = 0;
+    socket.emit('log:reset', { reason: 'Fichier de log supprimé — Snort redémarre ?' });
+  });
+
+  // Log file recreated after deletion
+  watcher.on('add', (p) => {
+    currentSize = 0;
+    socket.emit('log:reset', { reason: 'Nouveau fichier de log détecté — Snort redémarré.' });
+    // Stream the initial tail of the new file
+    try {
+      const lines = fs.readFileSync(p, 'utf8').split('\n').filter(Boolean);
+      lines.slice(-tailN).forEach(l => socket.emit('log:line', l));
+      currentSize = fs.statSync(p).size;
+    } catch (_) {}
+  });
+
   socket.on('disconnect', () => {
     console.log(`[ws] client disconnected: ${socket.id}`);
     watcher.close();

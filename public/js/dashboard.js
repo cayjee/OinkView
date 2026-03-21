@@ -303,6 +303,15 @@ socket.on('disconnect', function() {
   liveIndicator.classList.add('bg-red-600');
 });
 
+socket.on('log:reset', function(data) {
+  const msg = data && data.reason ? data.reason : 'Fichier de log réinitialisé.';
+  const div = document.createElement('div');
+  div.className = 'text-yellow-400 italic py-1 border-t border-yellow-600/30';
+  div.textContent = `⟳ ${msg}`;
+  logConsole.appendChild(div);
+  if (chkAutoscroll.checked) logConsole.scrollTop = logConsole.scrollHeight;
+});
+
 socket.on('log:line', function(line) {
   const parsed = parseLine(line);
   trackStats(parsed);
