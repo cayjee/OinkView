@@ -7,7 +7,6 @@
 
 const express  = require('express');
 const http     = require('http');
-const https    = require('https');
 const { Server } = require('socket.io');
 const fs       = require('fs');
 const path     = require('path');
@@ -18,9 +17,6 @@ const chokidar = require('chokidar');
 
 let dashResetTime  = 0; // timestamp ms — filtre les lignes du dashboard
 let statsResetTime = 0; // timestamp ms — filtre les stats
-
-// Cache VirusTotal : ip -> { result, cachedAt }
-const vtCache = {};
 
 // Parse le timestamp Snort "MM/DD-HH:MM:SS.usec" → ms epoch (année courante)
 function parseSnortTs(line) {
@@ -54,8 +50,7 @@ const DEFAULT_SETTINGS = {
   communityRulesDir:  '',
   tailLines:          200,
   snortBin:           '/usr/local/bin/snort',
-  snortInterface:     'eth0',
-  virusTotalApiKey:   ''
+  snortInterface:     'eth0'
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -503,61 +498,6 @@ app.get('/api/snort/config-raw', (_req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-});
-
-// ─── API — VirusTotal ─────────────────────────────────────────────────────────
-
-const VT_CACHE_TTL = 3600000; // 1 heure
-
-app.get('/api/vt/ip/:ip', function(req, res) {
-  const ip  = req.params.ip;
-  const key = loadSettings().virusTotalApiKey;
-
-  if (!key) return res.status(400).json({ error: 'Clé API VirusTotal non configurée dans les Paramètres.' });
-
-  // Cache
-  const cached = vtCache[ip];
-  if (cached && (Date.now() - cached.cachedAt) < VT_CACHE_TTL) {
-    return res.json(Object.assign({ fromCache: true }, cached.result));
-  }
-
-  const options = {
-    hostname: 'www.virustotal.com',
-    path:     '/api/v3/ip_addresses/' + ip,
-    headers:  { 'x-apikey': key, 'Accept': 'application/json' }
-  };
-
-  https.get(options, function(vtRes) {
-    var data = '';
-    vtRes.on('data', function(chunk) { data += chunk; });
-    vtRes.on('end', function() {
-      try {
-        var parsed = JSON.parse(data);
-        if (vtRes.statusCode !== 200) {
-          return res.status(vtRes.statusCode).json({ error: parsed.error ? parsed.error.message : 'Erreur VT' });
-        }
-        var attrs  = parsed.data ? parsed.data.attributes : {};
-        var stats  = attrs.last_analysis_stats || {};
-        var result = {
-          ip:          ip,
-          malicious:   stats.malicious   || 0,
-          suspicious:  stats.suspicious  || 0,
-          harmless:    stats.harmless    || 0,
-          undetected:  stats.undetected  || 0,
-          reputation:  attrs.reputation  || 0,
-          country:     attrs.country     || '',
-          tags:        attrs.tags        || [],
-          vtLink:      'https://www.virustotal.com/gui/ip-address/' + ip
-        };
-        vtCache[ip] = { result: result, cachedAt: Date.now() };
-        res.json(result);
-      } catch (e) {
-        res.status(500).json({ error: 'Réponse VT invalide: ' + e.message });
-      }
-    });
-  }).on('error', function(e) {
-    res.status(500).json({ error: e.message });
-  });
 });
 
 // ─── API — Reset dashboard / stats ───────────────────────────────────────────

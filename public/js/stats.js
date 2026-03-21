@@ -218,61 +218,15 @@ function renderTopIps(ipCounts, geoData) {
         flag = '<img src="https://flagcdn.com/16x12/' + geo.countryCode.toLowerCase() + '.png" class="inline w-4 mr-1 align-middle" onerror="this.style.display=\'none\'">';
       }
     }
-    var vtBtn = priv ? '' :
-      '<button onclick="checkVt(\'' + e.ip + '\', this)" ' +
-      'class="px-2 py-0.5 rounded text-xs bg-purple-900/50 hover:bg-purple-800 text-purple-300 transition-colors whitespace-nowrap">' +
-      '🛡 VT</button>';
-    return '<tr class="hover:bg-gray-800/50" id="vt-row-' + e.ip.replace(/\./g,'-') + '">' +
+    return '<tr class="hover:bg-gray-800/50">' +
       '<td class="px-6 py-3 text-gray-500 text-xs">' + (idx + 1) + '</td>' +
       '<td class="px-6 py-3 font-mono text-cyan-400 text-sm">' + e.ip + '</td>' +
       '<td class="px-6 py-3 text-gray-300 text-sm">' + flag + country + '</td>' +
       '<td class="px-6 py-3 text-gray-400 text-sm">' + city + '</td>' +
       '<td class="px-6 py-3 text-right"><span class="px-2 py-0.5 rounded-full bg-gray-800 text-orange-300 text-xs font-mono">' + e.count + '</span></td>' +
-      '<td class="px-6 py-3 text-right" id="vt-cell-' + e.ip.replace(/\./g,'-') + '">' + vtBtn + '</td>' +
       '</tr>';
   }).join('');
 }
-
-// ── VirusTotal ─────────────────────────────────────────────────────────────────
-
-window.checkVt = async function(ip, btn) {
-  btn.textContent = '…';
-  btn.disabled    = true;
-  try {
-    var r    = await fetch('/api/vt/ip/' + ip);
-    var data = await r.json();
-    if (data.error) {
-      showToast('VT: ' + data.error, 'err');
-      btn.textContent = '🛡 VT';
-      btn.disabled    = false;
-      return;
-    }
-    var cellId = 'vt-cell-' + ip.replace(/\./g, '-');
-    var cell   = document.getElementById(cellId);
-    if (!cell) return;
-
-    var badge;
-    if (data.malicious > 0) {
-      badge = '<a href="' + data.vtLink + '" target="_blank" ' +
-        'class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-red-900/70 text-red-300 hover:bg-red-800 transition-colors" title="' + data.malicious + ' moteurs le signalent comme malveillant">' +
-        '🚨 ' + data.malicious + ' malveillant' + (data.malicious > 1 ? 's' : '') + '</a>';
-    } else if (data.suspicious > 0) {
-      badge = '<a href="' + data.vtLink + '" target="_blank" ' +
-        'class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-yellow-900/70 text-yellow-300 hover:bg-yellow-800 transition-colors" title="' + data.suspicious + ' moteurs suspects">' +
-        '⚠ ' + data.suspicious + ' suspect' + (data.suspicious > 1 ? 's' : '') + '</a>';
-    } else {
-      badge = '<a href="' + data.vtLink + '" target="_blank" ' +
-        'class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold bg-green-900/70 text-green-300 hover:bg-green-800 transition-colors" title="Aucune detection">' +
-        '✓ Propre</a>';
-    }
-    cell.innerHTML = badge;
-    if (data.fromCache) showToast('Resultat VT depuis le cache (< 1h)', 'ok');
-  } catch (e) {
-    showToast('Erreur VT: ' + e.message, 'err');
-    btn.textContent = '🛡 VT';
-    btn.disabled    = false;
-  }
-};
 
 // ── Geo lookup ─────────────────────────────────────────────────────────────────
 

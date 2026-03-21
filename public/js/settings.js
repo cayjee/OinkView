@@ -3,7 +3,7 @@
  */
 'use strict';
 
-const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface', 'virusTotalApiKey'];
+const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface'];
 
 // ── Load settings on page start ───────────────────────────────────────────────
 

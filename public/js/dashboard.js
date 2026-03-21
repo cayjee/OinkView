@@ -213,13 +213,10 @@ function renderTopIps() {
     if (priv) geoStr = '<span class="text-gray-600">Local</span>';
     else if (geo && geo.country) geoStr = (geo.countryCode ? '<img src="https://flagcdn.com/16x12/' + geo.countryCode.toLowerCase() + '.png" class="inline w-4 mr-1 align-middle" onerror="this.style.display=\'none\'">' : '') + '<span class="text-gray-400">' + geo.city + '</span>';
     else geoStr = '<span class="text-gray-600">…</span>';
-    const vtId  = 'dash-vt-' + ip.replace(/\./g, '-');
-    const vtBtn = priv ? '' : '<button onclick="checkVtDash(\'' + ip + '\',\'' + vtId + '\')" class="ml-auto shrink-0 px-1.5 py-0.5 rounded text-xs bg-purple-900/50 hover:bg-purple-800 text-purple-300 transition-colors">VT</button>';
     return '<div class="flex items-center gap-2 px-3 py-1.5 border-b border-gray-800 last:border-0">' +
       '<span class="text-orange-400 font-mono text-xs w-8 shrink-0 text-right">' + count + '</span>' +
       '<span class="font-mono text-xs text-cyan-400 w-24 shrink-0">' + ip + '</span>' +
       '<span class="text-xs truncate flex-1">' + geoStr + '</span>' +
-      '<span id="' + vtId + '">' + vtBtn + '</span>' +
       '</div>';
   }).join('');
 }
@@ -452,33 +449,6 @@ document.getElementById('btnResetAll').addEventListener('click', async function(
   drawChart();
   showToast('Dashboard réinitialisé — les anciennes alertes sont masquées', 'ok');
 });
-
-// ── VirusTotal (dashboard) ────────────────────────────────────────────────────
-
-window.checkVtDash = async function(ip, cellId) {
-  const cell = document.getElementById(cellId);
-  if (!cell) return;
-  cell.innerHTML = '<span class="text-gray-400 text-xs">…</span>';
-  try {
-    const r    = await fetch('/api/vt/ip/' + ip);
-    const data = await r.json();
-    if (data.error) {
-      cell.innerHTML = '<span class="text-gray-500 text-xs" title="' + data.error + '">N/A</span>';
-      return;
-    }
-    let badge;
-    if (data.malicious > 0) {
-      badge = '<a href="' + data.vtLink + '" target="_blank" class="px-1.5 py-0.5 rounded text-xs bg-red-900/70 text-red-300 hover:bg-red-800" title="' + data.malicious + ' moteurs malveillants">🚨 ' + data.malicious + '</a>';
-    } else if (data.suspicious > 0) {
-      badge = '<a href="' + data.vtLink + '" target="_blank" class="px-1.5 py-0.5 rounded text-xs bg-yellow-800/70 text-yellow-300 hover:bg-yellow-700" title="' + data.suspicious + ' suspects">⚠ ' + data.suspicious + '</a>';
-    } else {
-      badge = '<a href="' + data.vtLink + '" target="_blank" class="px-1.5 py-0.5 rounded text-xs bg-green-900/50 text-green-400 hover:bg-green-800" title="Aucune détection">✓</a>';
-    }
-    cell.innerHTML = badge;
-  } catch (e) {
-    cell.innerHTML = '<span class="text-red-400 text-xs">Err</span>';
-  }
-};
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 drawChart();
