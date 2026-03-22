@@ -25,38 +25,44 @@ cd OinkView
 
 ---
 
-## 2. Configurer les chemins Snort
+## 2. Copier vos fichiers Snort
 
-OinkView a besoin d'accéder aux fichiers Snort de votre hôte.
-Les chemins dépendent de votre installation — configurez-les dans le fichier `.env`.
+OinkView utilise des dossiers fixes inclus dans le dépôt.
+Copiez vos fichiers Snort dans ces dossiers avant de démarrer.
+
+### Règles locales
 
 ```bash
-cp .env.example .env
-nano .env
+cp /chemin/vers/votre/local.rules rules/local.rules
 ```
 
-Contenu à adapter :
+### Règles communautaires (optionnel)
 
-```env
-# Dossier des règles (contient local.rules et les règles communautaires)
-SNORT_RULES_DIR=/etc/snort/rules
-
-# Dossier de configuration (contient snort.lua)
-SNORT_CONFIG_DIR=/usr/local/etc/snort
-
-# Binaire Snort
-SNORT_BIN=/usr/local/bin/snort
-
-# Dossier des logs (contient alert_fast.txt)
-SNORT_LOG_DIR=/var/log/snort
+```bash
+cp /chemin/vers/snort3-community.rules rules/community/
+# ou tous les fichiers .rules d'un dossier :
+cp /chemin/vers/vos/regles/*.rules rules/community/
 ```
 
-> **Où trouver mes fichiers Snort ?**
-> ```bash
-> find / -name "snort.lua" 2>/dev/null
-> find / -name "snort" -type f 2>/dev/null
-> find / -name "local.rules" 2>/dev/null
-> ```
+### Logs Snort
+
+Configurer Snort pour écrire ses alertes dans le dossier `logs/` d'OinkView :
+
+```lua
+-- Dans snort.lua
+alert_fast =
+{
+    file = true,
+    -- pointer vers le dossier logs/ d'OinkView
+    -- ex : /home/utilisateur/OinkView/logs/alert_fast.txt
+}
+```
+
+Ou créer un lien symbolique :
+
+```bash
+ln -s /var/log/snort/alert_fast.txt logs/alert_fast.txt
+```
 
 ---
 
@@ -68,20 +74,7 @@ sudo docker compose up -d --build
 
 Ouvrir dans le navigateur : **http://localhost:3000**
 
----
-
-## 4. Configurer OinkView
-
-Aller dans **Paramètres** et renseigner les mêmes chemins que dans `.env` :
-
-| Champ | Exemple |
-|-------|---------|
-| Fichier de règles locales | `/etc/snort/rules/local.rules` |
-| Fichier de logs | `/var/log/snort/alert_fast.txt` |
-| Fichier de configuration (snort.lua) | `/usr/local/etc/snort/snort.lua` |
-| Binaire Snort | `/usr/local/bin/snort` |
-
-Cliquer **Sauvegarder**.
+Les chemins sont préconfigurés — aucune modification nécessaire dans Paramètres pour les règles et les logs.
 
 ---
 

@@ -46,13 +46,13 @@ const SETTINGS_FILE = path.join(CONFIG_DIR, 'settings.json');
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
 
 const DEFAULT_SETTINGS = {
-  rulesFile:          '/etc/snort/rules/local.rules',
-  logFile:            '/var/log/snort/alert_fast.txt',
+  rulesFile:          '/snort/rules/local.rules',
+  logFile:            '/snort/logs/alert_fast.txt',
   logFormat:          'fast',
   reloadCommand:      'systemctl reload snort3',
   snortPidFile:       '/var/run/snort/snort.pid',
   snortConfig:        '/usr/local/etc/snort/snort.lua',
-  communityRulesDir:  '',
+  communityRulesDir:  '/snort/rules/community',
   tailLines:          200,
   snortBin:           '/usr/local/bin/snort',
   snortInterface:     'eth0',

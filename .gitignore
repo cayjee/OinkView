@@ -1,6 +1,11 @@
 node_modules/
-logs/*.log
 config/settings.json
+
+# Contenu des dossiers Snort (fichiers utilisateur, non commités)
+rules/*.rules
+rules/community/*.rules
+logs/*
+!logs/.gitkeep
 .env
 *.pid
 .DS_Store
