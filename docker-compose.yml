@@ -20,6 +20,7 @@ services:
       - ${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:ro
       - ${SNORT_BIN:-/usr/local/bin/snort}:${SNORT_BIN:-/usr/local/bin/snort}:ro
       - ${SNORT_LOG_DIR:-/var/log/snort}:${SNORT_LOG_DIR:-/var/log/snort}:ro
+    env_file: .env
     environment:
       - NODE_ENV=production
       - PORT=3000

@@ -52,7 +52,7 @@ const DEFAULT_SETTINGS = {
   reloadCommand:      'systemctl reload snort3',
   snortPidFile:       '/var/run/snort/snort.pid',
   snortConfig:        '/usr/local/etc/snort/snort.lua',
-  communityRulesDir:  '/etc/snort/rules/community',
+  communityRulesDir:  '/etc/snort/rules',
   tailLines:          200,
   snortBin:           '/usr/local/bin/snort',
   snortInterface:     'eth0',
@@ -64,8 +64,16 @@ const DEFAULT_SETTINGS = {
 
 function loadSettings() {
   try {
+    let s = { ...DEFAULT_SETTINGS };
     if (fs.existsSync(SETTINGS_FILE))
-      return { ...DEFAULT_SETTINGS, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) };
+      s = { ...s, ...JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8')) };
+    // Paths always come from .env variables (injected via env_file in docker-compose)
+    if (process.env.SNORT_LOCAL_RULES)   s.rulesFile         = process.env.SNORT_LOCAL_RULES;
+    if (process.env.SNORT_LOG_DIR)       s.logFile           = path.join(process.env.SNORT_LOG_DIR, 'alert_fast.txt');
+    if (process.env.SNORT_COMMUNITY_DIR) s.communityRulesDir = process.env.SNORT_COMMUNITY_DIR;
+    if (process.env.SNORT_CONFIG_DIR)    s.snortConfig       = path.join(process.env.SNORT_CONFIG_DIR, 'snort.lua');
+    if (process.env.SNORT_BIN)           s.snortBin          = process.env.SNORT_BIN;
+    return s;
   } catch (_) {}
   return { ...DEFAULT_SETTINGS };
 }
