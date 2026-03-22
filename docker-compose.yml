@@ -29,4 +29,3 @@ services:
     # Allow Snort reload via sudo/systemctl from container — optional
     # cap_add:
     #   - SYS_PTRACE
-    network_mode: host   # use host networking so ip-api.com geo lookups work
