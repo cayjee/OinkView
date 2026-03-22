@@ -6,7 +6,7 @@ rules/*.rules
 rules/community/*.rules
 logs/*
 !logs/.gitkeep
-.env
+# .env est commité — contient uniquement des chemins, aucun secret
 *.pid
 .DS_Store
 Thumbs.db

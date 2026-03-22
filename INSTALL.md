@@ -27,11 +27,13 @@ cd OinkView
 
 ## 2. Configurer les chemins Snort
 
+Ouvrir le fichier `.env` inclus dans le dépôt :
+
 ```bash
-cp .env.example .env
+nano .env
 ```
 
-**Installation standard Snort 3 → rien à modifier.** Le `.env` pointe déjà vers les chemins par défaut :
+**Installation standard Snort 3 → rien à modifier.** Les chemins par défaut sont déjà corrects :
 
 | Variable | Chemin par défaut | Description |
 |---|---|---|
@@ -40,11 +42,7 @@ cp .env.example .env
 | `SNORT_BIN` | `/usr/local/bin/snort` | Binaire Snort |
 | `SNORT_LOG_DIR` | `/var/log/snort` | Dossier des logs |
 
-**Installation non-standard** → éditer `.env` avec vos chemins réels :
-
-```bash
-nano .env
-```
+**Installation non-standard** → remplacer les valeurs par vos chemins réels.
 
 > Pour trouver vos chemins :
 > ```bash
@@ -112,8 +110,7 @@ git pull && sudo docker compose up -d --build
 
 ```
 OinkView/
-├── .env.example         ← Chemins Snort 3 par défaut (copier en .env)
-├── .env                 ← Votre configuration locale (non commité)
+├── .env                 ← Chemins Snort 3 (modifier si installation non-standard)
 ├── config/              ← settings.json persistant (volume Docker)
 ├── public/
 │   ├── index.html       ← Dashboard temps réel
