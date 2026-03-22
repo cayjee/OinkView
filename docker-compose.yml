@@ -13,14 +13,11 @@ services:
       # OinkView configuration (settings.json persists here)
       - ./config:/app/config
 
-      # Mount your Snort rules file (read/write)
-      - /etc/snort/rules/local.rules:/etc/snort/rules/local.rules
+      # Mount Snort rules directory (local.rules rw, rest ro via bind)
+      - /etc/snort/rules:/etc/snort/rules
 
       # Mount your Snort log file (read-only)
       - /var/log/snort/alert_fast.txt:/var/log/snort/alert_fast.txt:ro
-
-      # Mount community rules directory (read-only) — optional
-      # - /etc/snort/rules:/etc/snort/rules:ro
 
       # Mount Snort config for overview parsing (read-only) — optional
       # - /usr/local/etc/snort/snort.lua:/usr/local/etc/snort/snort.lua:ro
