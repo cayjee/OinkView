@@ -144,7 +144,7 @@ function authMiddleware(req, res, next) {
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api', authMiddleware);
 
@@ -580,6 +580,64 @@ app.post('/api/rules/validate', (_req, res) => {
     const output  = (stdout + stderr).trim();
     const success = output.includes('successfully validated');
     res.json({ success, output });
+  });
+});
+
+// ─── API — Test PCAP contre les règles Snort ─────────────────────────────────
+
+app.post('/api/pcap/test', (req, res) => {
+  const { snortBin, snortConfig } = loadSettings();
+  const { pcapBase64, description, category } = req.body;
+
+  if (!pcapBase64)
+    return res.status(400).json({ error: 'Fichier PCAP manquant' });
+  if (!description || !description.trim())
+    return res.status(400).json({ error: 'Description requise' });
+  if (!category)
+    return res.status(400).json({ error: 'Catégorie requise' });
+  if (!snortBin || !snortConfig)
+    return res.status(400).json({ error: 'snortBin et snortConfig non configurés dans Paramètres' });
+
+  const tmpId   = crypto.randomBytes(8).toString('hex');
+  const tmpPcap = `/tmp/oinkview-${tmpId}.pcap`;
+  const tmpLog  = `/tmp/oinkview-log-${tmpId}`;
+
+  try {
+    fs.writeFileSync(tmpPcap, Buffer.from(pcapBase64, 'base64'));
+    fs.mkdirSync(tmpLog, { recursive: true });
+  } catch (e) {
+    return res.status(500).json({ error: `Erreur fichier temporaire : ${e.message}` });
+  }
+
+  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig} -l ${tmpLog} 2>&1`;
+  exec(cmd, { timeout: 60000 }, (error, stdout, stderr) => {
+    const output = (stdout + (stderr || '')).trim();
+
+    // Lire les fichiers d'alertes générés dans tmpLog
+    let alertLines = [];
+    try {
+      fs.readdirSync(tmpLog).forEach(f => {
+        if (f.startsWith('alert')) {
+          fs.readFileSync(path.join(tmpLog, f), 'utf8')
+            .split('\n').filter(Boolean)
+            .forEach(l => alertLines.push(l));
+        }
+      });
+    } catch (_) {}
+
+    // Fallback : parser stdout pour les lignes d'alertes
+    if (alertLines.length === 0) {
+      output.split('\n').forEach(line => {
+        if (line.includes('[**]') || line.includes('[Priority:')) alertLines.push(line);
+      });
+    }
+
+    // Nettoyage fichiers temporaires
+    try { fs.unlinkSync(tmpPcap); } catch (_) {}
+    try { fs.rmSync(tmpLog, { recursive: true, force: true }); } catch (_) {}
+
+    const alertCount = alertLines.filter(l => l.includes('[**]')).length;
+    res.json({ success: true, alertCount, alerts: alertLines, output, description, category });
   });
 });
 
