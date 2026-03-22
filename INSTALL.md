@@ -56,16 +56,21 @@ nano .env
 
 ## 3. Préparer les fichiers Snort
 
-Docker monte les fichiers Snort comme volumes. Si le fichier `local.rules` n'existe pas encore, Docker crée un **dossier** à sa place, ce qui provoque une erreur. Créez-le avant de lancer le container :
+Docker monte les fichiers Snort comme volumes. Si un fichier n'existe pas encore sur l'hôte, Docker crée un **dossier** à sa place, ce qui provoque une erreur. Créez tous les fichiers nécessaires avant de lancer le container :
 
 ```bash
-# Créer le fichier local.rules s'il n'existe pas
+# Fichier de règles locales
 sudo mkdir -p /etc/snort/rules
 sudo touch /etc/snort/rules/local.rules
 sudo chmod 664 /etc/snort/rules/local.rules
+
+# Fichier de log Snort
+sudo mkdir -p /var/log/snort
+sudo touch /var/log/snort/alert_fast.txt
+sudo chmod 644 /var/log/snort/alert_fast.txt
 ```
 
-> Si vous avez modifié `SNORT_LOCAL_RULES` dans `.env`, remplacez `/etc/snort/rules/local.rules` par votre chemin.
+> Si vous avez modifié les chemins dans `.env`, adaptez les commandes ci-dessus.
 
 ---
 
