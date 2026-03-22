@@ -102,7 +102,7 @@
           <label class="field-label">Fichier de règles locales (local.rules)</label>
           <div class="flex gap-2">
             <input id="rulesFile" type="text" class="form-input flex-1"
-                   placeholder="/etc/snort/rules/local.rules"/>
+                   placeholder="/snort/rules/local.rules"/>
             <button onclick="testPath('rulesFile', 'rw')"
                     class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
               Tester
@@ -116,7 +116,7 @@
           <label class="field-label">Fichier de logs d'alertes</label>
           <div class="flex gap-2">
             <input id="logFile" type="text" class="form-input flex-1"
-                   placeholder="/var/log/snort/alert_fast.txt"/>
+                   placeholder="/snort/logs/alert_fast.txt"/>
             <button onclick="testPath('logFile', 'r')"
                     class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
               Tester
@@ -140,7 +140,7 @@
           <label class="field-label">Dossier des règles communautaires</label>
           <div class="flex gap-2">
             <input id="communityRulesDir" type="text" class="form-input flex-1"
-                   placeholder="/usr/local/etc/snort/rules"/>
+                   placeholder="/snort/rules/community"/>
             <button onclick="testPath('communityRulesDir')"
                     class="px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300 transition-colors whitespace-nowrap">
               Tester
