@@ -13,14 +13,17 @@ services:
       # OinkView configuration (settings.json persists here)
       - ./config:/app/config
 
-      # Mount Snort rules directory (local.rules rw, rest ro via bind)
-      - /etc/snort/rules:/etc/snort/rules
+      # Snort rules — covers any subdirectory configured in OinkView settings
+      - /etc/snort:/etc/snort
 
-      # Mount your Snort log file (read-only)
-      - /var/log/snort/alert_fast.txt:/var/log/snort/alert_fast.txt:ro
+      # Snort 3 default install path (config, rules, includes)
+      - /usr/local/etc/snort:/usr/local/etc/snort
 
-      # Mount Snort config for overview parsing (read-only) — optional
-      # - /usr/local/etc/snort/snort.lua:/usr/local/etc/snort/snort.lua:ro
+      # Snort binary — needed for config validation and PCAP test
+      - /usr/local/bin/snort:/usr/local/bin/snort:ro
+
+      # Snort logs — covers any log file path configured in OinkView settings
+      - /var/log/snort:/var/log/snort:ro
     environment:
       - NODE_ENV=production
       - PORT=3000
