@@ -102,15 +102,20 @@ alert_fast =
 
 ### Inclure local.rules
 
-Dans `snort.lua`, assurez-vous que le bloc `ips` inclut votre fichier de règles :
+Dans `snort.lua`, trouvez le bloc `ips = {` **existant** et ajoutez la ligne `include` à l'intérieur :
 
 ```lua
 ips =
 {
+    -- use this to enable decoder and inspector alerts
+    --enable_builtin_rules = true,
+
     include = '/etc/snort/rules/local.rules',
     variables = default_variables
 }
 ```
+
+> Ne créez pas un second bloc `ips` — modifiez celui qui existe déjà dans le fichier.
 
 ---
 
