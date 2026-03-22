@@ -54,7 +54,22 @@ nano .env
 
 ---
 
-## 3. Lancer le container
+## 3. Préparer les fichiers Snort
+
+Docker monte les fichiers Snort comme volumes. Si le fichier `local.rules` n'existe pas encore, Docker crée un **dossier** à sa place, ce qui provoque une erreur. Créez-le avant de lancer le container :
+
+```bash
+# Créer le fichier local.rules s'il n'existe pas
+sudo mkdir -p /etc/snort/rules
+sudo touch /etc/snort/rules/local.rules
+sudo chmod 664 /etc/snort/rules/local.rules
+```
+
+> Si vous avez modifié `SNORT_LOCAL_RULES` dans `.env`, remplacez `/etc/snort/rules/local.rules` par votre chemin.
+
+---
+
+## 4. Lancer le container
 
 ```bash
 sudo docker compose up -d --build
@@ -64,7 +79,7 @@ Ouvrir dans le navigateur : **http://localhost:3000**
 
 ---
 
-## 4. Configuration Snort recommandée
+## 5. Configuration Snort recommandée
 
 ### Activer alert_fast dans snort.lua
 
@@ -89,7 +104,7 @@ ips =
 
 ---
 
-## 5. Commandes utiles
+## 6. Commandes utiles
 
 ```bash
 # Voir les logs du container
@@ -107,7 +122,7 @@ git pull && sudo docker compose up -d --build
 
 ---
 
-## 6. Arborescence du projet
+## 7. Arborescence du projet
 
 ```
 OinkView/
