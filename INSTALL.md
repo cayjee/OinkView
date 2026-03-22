@@ -84,20 +84,25 @@ Ouvrir dans le navigateur : **http://localhost:3000**
 
 ---
 
-## 5. Configuration Snort recommandée
+## 5. Configuration Snort obligatoire
 
-### Activer alert_fast dans snort.lua
+Ces modifications sont à faire **une seule fois** dans votre `snort.lua` **avant** de lancer OinkView. Sans elles, aucune alerte n'apparaîtra dans le dashboard.
+
+### Activer alert_fast (écriture dans le fichier log)
+
+Dans `snort.lua`, trouvez la ligne `--alert_fast = { }` et remplacez-la par :
 
 ```lua
 alert_fast =
 {
     file = true,
     packet = false,
-    limit = 10,
 }
 ```
 
 ### Inclure local.rules
+
+Dans `snort.lua`, assurez-vous que le bloc `ips` inclut votre fichier de règles :
 
 ```lua
 ips =
