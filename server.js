@@ -626,28 +626,16 @@ app.post('/api/pcap/test', (req, res) => {
     rulesFlags = files.map(f => ` -R ${path.join(communityRulesDir, f)}`).join('');
   }
 
-  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig}${rulesFlags} -l ${tmpLog} 2>&1`;
+  // Forcer alert_fast en console (stdout) — indépendant de la config snort.lua
+  const luaOverride = `--lua "alert_fast = { file = false, packet = false }"`;
+  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig} ${luaOverride}${rulesFlags} 2>&1`;
   exec(cmd, { timeout: 60000 }, (error, stdout, stderr) => {
     const output = (stdout + (stderr || '')).trim();
 
-    // Lire les fichiers d'alertes générés dans tmpLog
-    let alertLines = [];
-    try {
-      fs.readdirSync(tmpLog).forEach(f => {
-        if (f.startsWith('alert')) {
-          fs.readFileSync(path.join(tmpLog, f), 'utf8')
-            .split('\n').filter(Boolean)
-            .forEach(l => alertLines.push(l));
-        }
-      });
-    } catch (_) {}
-
-    // Fallback : parser stdout pour les lignes d'alertes
-    if (alertLines.length === 0) {
-      output.split('\n').forEach(line => {
-        if (line.includes('[**]') || line.includes('[Priority:')) alertLines.push(line);
-      });
-    }
+    // Lire les alertes depuis stdout (alert_fast console)
+    const alertLines = output.split('\n').filter(l =>
+      l.includes('[**]') || l.includes('[Priority:')
+    );
 
     // Nettoyage fichiers temporaires
     try { fs.unlinkSync(tmpPcap); } catch (_) {}
