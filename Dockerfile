@@ -1,5 +1,5 @@
 # ── Build stage ───────────────────────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 
 WORKDIR /app
 
@@ -7,12 +7,9 @@ COPY package*.json ./
 RUN npm install --omit=dev --no-audit --no-fund
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
-FROM node:20-alpine
+FROM node:20-slim
 
 WORKDIR /app
-
-# Non-root user for security
-RUN addgroup -S oinkview && adduser -S oinkview -G oinkview
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
@@ -20,9 +17,7 @@ COPY server.js ./
 COPY public/ ./public/
 
 # Config and logs are mounted as volumes at runtime
-RUN mkdir -p config logs && chown -R oinkview:oinkview /app
-
-USER oinkview
+RUN mkdir -p config logs
 
 EXPOSE 3000
 
