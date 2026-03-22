@@ -13,9 +13,10 @@ services:
       # OinkView configuration (settings.json persists here)
       - ./config:/app/config
 
-      # Snort paths — définis dans .env (copier .env.example en .env)
+      # Snort paths — définis dans .env
       # Installation standard Snort 3 : aucune modification nécessaire
-      - ${SNORT_RULES_DIR:-/etc/snort/rules}:${SNORT_RULES_DIR:-/etc/snort/rules}
+      - ${SNORT_LOCAL_RULES:-/etc/snort/rules/local.rules}:${SNORT_LOCAL_RULES:-/etc/snort/rules/local.rules}
+      - ${SNORT_COMMUNITY_DIR:-/etc/snort/rules}:${SNORT_COMMUNITY_DIR:-/etc/snort/rules}:ro
       - ${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:ro
       - ${SNORT_BIN:-/usr/local/bin/snort}:${SNORT_BIN:-/usr/local/bin/snort}:ro
       - ${SNORT_LOG_DIR:-/var/log/snort}:${SNORT_LOG_DIR:-/var/log/snort}:ro

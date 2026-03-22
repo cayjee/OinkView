@@ -37,7 +37,8 @@ nano .env
 
 | Variable | Chemin par défaut | Description |
 |---|---|---|
-| `SNORT_RULES_DIR` | `/etc/snort/rules` | Dossier des règles |
+| `SNORT_LOCAL_RULES` | `/etc/snort/rules/local.rules` | Fichier des règles locales (rw) |
+| `SNORT_COMMUNITY_DIR` | `/etc/snort/rules` | Dossier des règles communautaires (ro) |
 | `SNORT_CONFIG_DIR` | `/usr/local/etc/snort` | Dossier de configuration |
 | `SNORT_BIN` | `/usr/local/bin/snort` | Binaire Snort |
 | `SNORT_LOG_DIR` | `/var/log/snort` | Dossier des logs |

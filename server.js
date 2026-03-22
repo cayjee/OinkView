@@ -52,7 +52,7 @@ const DEFAULT_SETTINGS = {
   reloadCommand:      'systemctl reload snort3',
   snortPidFile:       '/var/run/snort/snort.pid',
   snortConfig:        '/usr/local/etc/snort/snort.lua',
-  communityRulesDir:  '/etc/snort/rules',
+  communityRulesDir:  '/etc/snort/rules/community',
   tailLines:          200,
   snortBin:           '/usr/local/bin/snort',
   snortInterface:     'eth0',
