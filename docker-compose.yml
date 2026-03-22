@@ -20,10 +20,13 @@ services:
       - ${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:ro
       - ${SNORT_BIN:-/usr/local/bin/snort}:${SNORT_BIN:-/usr/local/bin/snort}:ro
       - ${SNORT_LOG_DIR:-/var/log/snort}:${SNORT_LOG_DIR:-/var/log/snort}:ro
+      # Snort runtime libraries (needed when built from source)
+      - /usr/local/lib:/usr/local/lib:ro
     env_file: .env
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - LD_LIBRARY_PATH=/usr/local/lib
     # Allow Snort reload via sudo/systemctl from container — optional
     # cap_add:
     #   - SYS_PTRACE
