@@ -6,6 +6,7 @@ services:
     build: .
     container_name: oinkview
     restart: unless-stopped
+    user: "0"
     ports:
       - "3000:3000"
     volumes:
