@@ -10,7 +10,7 @@ Elle se déploie via Docker et accède directement aux fichiers Snort de l'hôte
 | Outil          | Version minimale |
 |----------------|-----------------|
 | Docker         | 20+             |
-| Docker Compose | 1.29+ / v2      |
+| Docker Compose | v2 (`docker compose`) |
 | Snort          | 3.x             |
 | OS             | Linux (Debian/Ubuntu/RHEL) |
 
@@ -25,32 +25,67 @@ cd OinkView
 
 ---
 
-## 2. Adapter les volumes
+## 2. Configurer les chemins Snort
 
-Éditer `docker-compose.yml` pour pointer vers vos fichiers Snort :
+OinkView a besoin d'accéder aux fichiers Snort de votre hôte.
+Les chemins dépendent de votre installation — configurez-les dans le fichier `.env`.
 
-```yaml
-volumes:
-  - ./config:/app/config
-  - /etc/snort/rules/local.rules:/etc/snort/rules/local.rules
-  - /var/log/snort/alert_fast.txt:/var/log/snort/alert_fast.txt:ro
+```bash
+cp .env.example .env
+nano .env
 ```
 
-Ajuster les chemins selon votre installation Snort.
+Contenu à adapter :
+
+```env
+# Dossier des règles (contient local.rules et les règles communautaires)
+SNORT_RULES_DIR=/etc/snort/rules
+
+# Dossier de configuration (contient snort.lua)
+SNORT_CONFIG_DIR=/usr/local/etc/snort
+
+# Binaire Snort
+SNORT_BIN=/usr/local/bin/snort
+
+# Dossier des logs (contient alert_fast.txt)
+SNORT_LOG_DIR=/var/log/snort
+```
+
+> **Où trouver mes fichiers Snort ?**
+> ```bash
+> find / -name "snort.lua" 2>/dev/null
+> find / -name "snort" -type f 2>/dev/null
+> find / -name "local.rules" 2>/dev/null
+> ```
 
 ---
 
 ## 3. Lancer le container
 
 ```bash
-docker-compose up -d --build
+sudo docker compose up -d --build
 ```
 
 Ouvrir dans le navigateur : **http://localhost:3000**
 
 ---
 
-## 4. Configuration Snort recommandée
+## 4. Configurer OinkView
+
+Aller dans **Paramètres** et renseigner les mêmes chemins que dans `.env` :
+
+| Champ | Exemple |
+|-------|---------|
+| Fichier de règles locales | `/etc/snort/rules/local.rules` |
+| Fichier de logs | `/var/log/snort/alert_fast.txt` |
+| Fichier de configuration (snort.lua) | `/usr/local/etc/snort/snort.lua` |
+| Binaire Snort | `/usr/local/bin/snort` |
+
+Cliquer **Sauvegarder**.
+
+---
+
+## 5. Configuration Snort recommandée
 
 ### Activer alert_fast dans snort.lua
 
@@ -75,37 +110,40 @@ ips =
 
 ---
 
-## 5. Commandes utiles
+## 6. Commandes utiles
 
 ```bash
 # Voir les logs du container
-docker logs -f oinkview
+sudo docker logs -f oinkview
 
 # Redémarrer
-docker-compose restart
+sudo docker compose restart
 
 # Arrêter
-docker-compose down
+sudo docker compose down
 
 # Mettre à jour
-git pull && docker-compose up -d --build
+git pull && sudo docker compose up -d --build
 ```
 
 ---
 
-## 6. Arborescence du projet
+## 7. Arborescence du projet
 
 ```
 OinkView/
-├── config/                     ← settings.json persistant (volume)
+├── .env.example            ← Modèle de configuration des chemins Snort
+├── .env                    ← Votre configuration locale (non commité)
+├── config/                 ← settings.json persistant (volume Docker)
 ├── public/
-│   ├── index.html              ← Dashboard temps réel
-│   ├── rules.html              ← Éditeur de règles Snort 3
-│   ├── stats.html              ← Statistiques
-│   ├── overview.html           ← Vue globale
-│   ├── settings.html           ← Paramètres
+│   ├── index.html          ← Dashboard temps réel
+│   ├── rules.html          ← Éditeur de règles Snort 3
+│   ├── pcap.html           ← Test PCAP contre les règles
+│   ├── stats.html          ← Statistiques
+│   ├── overview.html       ← Vue globale
+│   ├── settings.html       ← Paramètres
 │   └── js/
-├── server.js                   ← Backend Express + Socket.io
+├── server.js               ← Backend Express + Socket.io
 ├── Dockerfile
 └── docker-compose.yml
 ```
