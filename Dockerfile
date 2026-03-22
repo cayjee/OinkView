@@ -16,6 +16,11 @@ COPY package*.json ./
 COPY server.js ./
 COPY public/ ./public/
 
+# Runtime deps for Snort 3 binary (mounted from host via volume)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libpcap0.8 libpcre2-8-0 libssl3 libhwloc15 libdumbnet1 liblzma5 libunwind8 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Config and logs are mounted as volumes at runtime
 RUN mkdir -p config logs
 
