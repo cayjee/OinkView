@@ -25,40 +25,34 @@ cd OinkView
 
 ---
 
-## 2. Copier vos fichiers Snort
+## 2. Placer vos fichiers Snort
 
-OinkView utilise des dossiers fixes inclus dans le dépôt.
-Copiez vos fichiers Snort dans ces dossiers avant de démarrer.
+OinkView utilise une structure de dossiers fixe. Placez vos fichiers aux emplacements suivants :
+
+```
+OinkView/
+├── rules/
+│   ├── local.rules          ← vos règles locales
+│   └── community/           ← vos règles communautaires (.rules)
+└── logs/
+    └── alert_fast.txt       ← fichier de log Snort (symlink ou copie)
+```
 
 ### Règles locales
 
+Le fichier `rules/local.rules` est déjà présent (vide). OinkView le gère directement.
+
+### Règles communautaires
+
+Copiez vos fichiers `.rules` dans `rules/community/` :
+
 ```bash
-cp /chemin/vers/votre/local.rules rules/local.rules
+cp snort3-community.rules rules/community/
 ```
 
-### Règles communautaires (optionnel)
+### Logs
 
-```bash
-cp /chemin/vers/snort3-community.rules rules/community/
-# ou tous les fichiers .rules d'un dossier :
-cp /chemin/vers/vos/regles/*.rules rules/community/
-```
-
-### Logs Snort
-
-Configurer Snort pour écrire ses alertes dans le dossier `logs/` d'OinkView :
-
-```lua
--- Dans snort.lua
-alert_fast =
-{
-    file = true,
-    -- pointer vers le dossier logs/ d'OinkView
-    -- ex : /home/utilisateur/OinkView/logs/alert_fast.txt
-}
-```
-
-Ou créer un lien symbolique :
+Créez un lien symbolique vers votre fichier de log Snort :
 
 ```bash
 ln -s /var/log/snort/alert_fast.txt logs/alert_fast.txt
@@ -74,11 +68,11 @@ sudo docker compose up -d --build
 
 Ouvrir dans le navigateur : **http://localhost:3000**
 
-Les chemins sont préconfigurés — aucune modification nécessaire dans Paramètres pour les règles et les logs.
+Les chemins sont préconfigurés — aucune modification nécessaire dans Paramètres.
 
 ---
 
-## 5. Configuration Snort recommandée
+## 4. Configuration Snort recommandée
 
 ### Activer alert_fast dans snort.lua
 
@@ -96,14 +90,14 @@ alert_fast =
 ```lua
 ips =
 {
-    include = '/etc/snort/rules/local.rules',
+    include = '/snort/rules/local.rules',
     variables = default_variables
 }
 ```
 
 ---
 
-## 6. Commandes utiles
+## 5. Commandes utiles
 
 ```bash
 # Voir les logs du container
@@ -121,22 +115,23 @@ git pull && sudo docker compose up -d --build
 
 ---
 
-## 7. Arborescence du projet
+## 6. Arborescence du projet
 
 ```
 OinkView/
-├── .env.example            ← Modèle de configuration des chemins Snort
-├── .env                    ← Votre configuration locale (non commité)
-├── config/                 ← settings.json persistant (volume Docker)
+├── rules/
+│   ├── local.rules          ← règles locales (géré par OinkView)
+│   └── community/           ← règles communautaires (lecture seule)
+├── logs/                    ← fichier de log Snort
+├── config/                  ← settings.json persistant (volume Docker)
 ├── public/
-│   ├── index.html          ← Dashboard temps réel
-│   ├── rules.html          ← Éditeur de règles Snort 3
-│   ├── pcap.html           ← Test PCAP contre les règles
-│   ├── stats.html          ← Statistiques
-│   ├── overview.html       ← Vue globale
-│   ├── settings.html       ← Paramètres
-│   └── js/
-├── server.js               ← Backend Express + Socket.io
+│   ├── index.html           ← Dashboard temps réel
+│   ├── rules.html           ← Éditeur de règles Snort 3
+│   ├── pcap.html            ← Test PCAP contre les règles
+│   ├── stats.html           ← Statistiques
+│   ├── overview.html        ← Vue globale
+│   └── settings.html        ← Paramètres
+├── server.js                ← Backend Express + Socket.io
 ├── Dockerfile
 └── docker-compose.yml
 ```
