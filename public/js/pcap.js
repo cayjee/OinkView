@@ -63,6 +63,7 @@ function setFile(file) {
 
 document.getElementById('btnRunTest').addEventListener('click', async () => {
   const category    = document.getElementById('pcapCategory').value;
+  const rulesSource = document.getElementById('pcapRulesSource').value;
   const description = document.getElementById('pcapDescription').value.trim();
 
   if (!category)              { showToast('Sélectionnez une catégorie', 'err'); return; }
@@ -81,7 +82,7 @@ document.getElementById('btnRunTest').addEventListener('click', async () => {
     const r = await fetch('/api/pcap/test', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ pcapBase64, description, category })
+      body:    JSON.stringify({ pcapBase64, description, category, rulesSource })
     });
     const data = await r.json();
 

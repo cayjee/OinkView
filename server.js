@@ -594,8 +594,8 @@ app.post('/api/rules/validate', (_req, res) => {
 // ─── API — Test PCAP contre les règles Snort ─────────────────────────────────
 
 app.post('/api/pcap/test', (req, res) => {
-  const { snortBin, snortConfig } = loadSettings();
-  const { pcapBase64, description, category } = req.body;
+  const { snortBin, snortConfig, rulesFile, communityRulesDir } = loadSettings();
+  const { pcapBase64, description, category, rulesSource = 'config' } = req.body;
 
   if (!pcapBase64)
     return res.status(400).json({ error: 'Fichier PCAP manquant' });
@@ -617,7 +617,16 @@ app.post('/api/pcap/test', (req, res) => {
     return res.status(500).json({ error: `Erreur fichier temporaire : ${e.message}` });
   }
 
-  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig} -l ${tmpLog} 2>&1`;
+  // Construire les flags -R selon la source de règles choisie
+  let rulesFlags = '';
+  if (rulesSource === 'local' && rulesFile && fs.existsSync(rulesFile)) {
+    rulesFlags = ` -R ${rulesFile}`;
+  } else if (rulesSource === 'community' && communityRulesDir && fs.existsSync(communityRulesDir)) {
+    const files = fs.readdirSync(communityRulesDir).filter(f => f.endsWith('.rules'));
+    rulesFlags = files.map(f => ` -R ${path.join(communityRulesDir, f)}`).join('');
+  }
+
+  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig}${rulesFlags} -l ${tmpLog} 2>&1`;
   exec(cmd, { timeout: 60000 }, (error, stdout, stderr) => {
     const output = (stdout + (stderr || '')).trim();
 

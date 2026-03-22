@@ -83,6 +83,17 @@
           </select>
         </div>
 
+        <!-- Source des règles -->
+        <div>
+          <label class="field-label">Source des règles <span class="text-red-400">*</span></label>
+          <select id="pcapRulesSource" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-orange-500 transition-colors">
+            <option value="config">Toutes les règles (snort.lua)</option>
+            <option value="local">local.rules uniquement</option>
+            <option value="community">Règles communautaires uniquement</option>
+          </select>
+          <p class="text-xs text-gray-600 mt-1">Choisissez quelles règles Snort sont utilisées pour analyser le PCAP.</p>
+        </div>
+
         <!-- Description -->
         <div>
           <label class="field-label">Description du test <span class="text-red-400">*</span></label>
