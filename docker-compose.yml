@@ -13,17 +13,12 @@ services:
       # OinkView configuration (settings.json persists here)
       - ./config:/app/config
 
-      # Règles : copier local.rules et dossier community/ ici avant de démarrer
-      - ./rules:/snort/rules
-
-      # Logs : configurer Snort pour écrire dans ce dossier
-      - ./logs:/snort/logs:ro
-
-      # Binaire Snort (pour validation config et test PCAP)
-      - /usr/local/bin/snort:/usr/local/bin/snort:ro
-
-      # Config Snort (pour validation et vue globale) — optionnel
-      - /usr/local/etc/snort:/usr/local/etc/snort:ro
+      # Snort paths — définis dans .env (copier .env.example en .env)
+      # Installation standard Snort 3 : aucune modification nécessaire
+      - ${SNORT_RULES_DIR:-/etc/snort/rules}:${SNORT_RULES_DIR:-/etc/snort/rules}
+      - ${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:${SNORT_CONFIG_DIR:-/usr/local/etc/snort}:ro
+      - ${SNORT_BIN:-/usr/local/bin/snort}:${SNORT_BIN:-/usr/local/bin/snort}:ro
+      - ${SNORT_LOG_DIR:-/var/log/snort}:${SNORT_LOG_DIR:-/var/log/snort}:ro
     environment:
       - NODE_ENV=production
       - PORT=3000
