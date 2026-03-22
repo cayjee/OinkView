@@ -102,39 +102,28 @@ function updatePermissions() {
   if (pRules) pRules.textContent = rules;
   if (pLog)   pLog.textContent   = log;
 
-  // Bloc 1 : droits fichiers
+  // Bloc 1 : droits fichiers hôte
   const cmdFiles = document.getElementById('cmd-files');
   if (cmdFiles) cmdFiles.textContent =
-`# Groupe snort + droits sur les fichiers
-sudo groupadd -f snort
-sudo usermod -aG snort $USER
-
-# Fichier de règles locales (lecture + écriture)
-sudo chown root:snort ${rules}
+`# Rendre les fichiers accessibles au container (hôte)
 sudo chmod 664 ${rules}
+sudo chmod 644 ${log}`;
 
-# Fichier de logs (lecture seule)
-sudo chown root:snort ${log}
-sudo chmod 640 ${log}`;
-
-  // Bloc 2 : sudoers reload
+  // Bloc 2 : volumes docker-compose
   const cmdSudo = document.getElementById('cmd-sudo');
-  if (cmdSudo) {
-    const bin = reload.startsWith('systemctl') ? '/bin/systemctl' : '/bin/kill';
-    cmdSudo.textContent =
-`echo "$USER ALL=(ALL) NOPASSWD: ${bin}" \\
-  | sudo tee /etc/sudoers.d/oinkview
-sudo chmod 440 /etc/sudoers.d/oinkview`;
-  }
+  if (cmdSudo) cmdSudo.textContent =
+`volumes:
+  - ./config:/app/config
+  - ${rules}:${rules}
+  - ${log}:${log}:ro`;
 
   // Bloc 3 : dossier communautaire (masqué si vide)
   const communityBlock = document.getElementById('perm-community-block');
   const cmdCommunity   = document.getElementById('cmd-community');
   if (communityBlock) communityBlock.style.display = community ? '' : 'none';
   if (cmdCommunity && community) cmdCommunity.textContent =
-`# Accès lecture au dossier des règles communautaires
-sudo chown -R root:snort ${community}
-sudo chmod -R 750 ${community}`;
+`# Ajouter dans docker-compose.yml → volumes :
+  - ${community}:${community}:ro`;
 }
 
 // Mettre à jour les permissions quand un champ change

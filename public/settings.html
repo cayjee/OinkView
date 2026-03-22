@@ -280,16 +280,18 @@
         </div>
       </div>
 
-      <!-- Permissions Linux -->
+      <!-- Permissions Docker -->
       <div class="bg-blue-900/20 border border-blue-800/40 rounded-xl p-5 text-xs text-blue-300 space-y-4 leading-relaxed">
-        <p class="font-semibold text-blue-200 text-sm">Permissions Linux requises</p>
-        <p>Le processus Node.js doit pouvoir <strong>lire et écrire</strong> dans <code class="text-orange-300" id="perm-rules"></code>
-           et <strong>lire</strong> <code class="text-orange-300" id="perm-log"></code>.</p>
+        <p class="font-semibold text-blue-200 text-sm">Permissions Docker requises</p>
+        <p>Le container Docker accède aux fichiers Snort via les volumes montés dans <code class="text-orange-300">docker-compose.yml</code>.
+           Les fichiers hôte doivent être lisibles/éditables par le container.</p>
+        <p>Fichier de règles : <code class="text-orange-300" id="perm-rules"></code> &nbsp;|&nbsp;
+           Logs : <code class="text-orange-300" id="perm-log"></code></p>
 
-        <!-- Bloc 1 : droits sur les fichiers -->
+        <!-- Bloc 1 : droits sur les fichiers hôte -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-blue-300 font-medium">Droits sur les fichiers Snort</span>
+            <span class="text-blue-300 font-medium">Droits sur les fichiers Snort (hôte)</span>
             <button onclick="copyBlock('cmd-files')"
                     class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,10 +304,10 @@
           <pre id="cmd-files" class="bg-gray-950 rounded p-3 text-green-300 overflow-x-auto whitespace-pre-wrap"></pre>
         </div>
 
-        <!-- Bloc 2 : sudoers pour reload -->
+        <!-- Bloc 2 : volumes docker-compose -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <span class="text-blue-300 font-medium">Autoriser reload sans mot de passe (sudoers)</span>
+            <span class="text-blue-300 font-medium">Volumes à déclarer dans docker-compose.yml</span>
             <button onclick="copyBlock('cmd-sudo')"
                     class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,7 +323,7 @@
         <!-- Bloc 3 : dossier règles communautaires -->
         <div id="perm-community-block">
           <div class="flex items-center justify-between mb-1">
-            <span class="text-blue-300 font-medium">Accès lecture au dossier communautaire</span>
+            <span class="text-blue-300 font-medium">Volume dossier communautaire (optionnel)</span>
             <button onclick="copyBlock('cmd-community')"
                     class="px-2 py-1 rounded bg-blue-900/50 hover:bg-blue-800 text-blue-200 transition-colors flex items-center gap-1">
               <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
