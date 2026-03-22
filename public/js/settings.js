@@ -3,6 +3,9 @@
  */
 'use strict';
 
+// Champs en lecture seule — affichés mais non modifiables (définis dans .env)
+const readonlyFields = ['rulesFile', 'logFile', 'communityRulesDir', 'snortConfig', 'snortBin'];
+// Champs éditables — sauvegardés dans settings.json
 const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface', 'authEnabled'];
 
 // ── Load settings on page start ───────────────────────────────────────────────
@@ -29,6 +32,7 @@ const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand
 document.getElementById('btnSave').addEventListener('click', async () => {
   const payload = {};
   fields.forEach(key => {
+    if (readonlyFields.includes(key)) return; // ne pas sauvegarder les chemins .env
     const el = document.getElementById(key);
     if (!el) return;
     if (el.type === 'checkbox')    payload[key] = el.checked;
