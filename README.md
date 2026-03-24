@@ -1,6 +1,6 @@
-# OinkView — Snort 3 GUI Manager
+# OinkView — Snort 3 Management Interface
 
-> Interface web locale pour gérer, surveiller et analyser les alertes **Snort 3** en temps réel.
+> L'interface de gestion Snort 3 que votre SIEM ne peut pas remplacer.
 
 ![Node.js](https://img.shields.io/badge/Node.js-20-green?logo=node.js)
 ![Express](https://img.shields.io/badge/Express-4.x-lightgrey?logo=express)
@@ -10,17 +10,68 @@
 
 ---
 
-## Aperçu
+## Pourquoi OinkView ?
 
-OinkView est une interface web légère qui se connecte directement à vos fichiers Snort 3 pour vous offrir :
+Un SIEM ingère vos logs Snort, les corrèle, génère des alertes — mais il ne peut pas **modifier une règle**, **désactiver un faux positif**, **créer une signature** ou **valider votre configuration** sans que vous ouvriez un terminal SSH.
 
-- Une **console d'alertes en temps réel** avec filtres avancés
-- Un **éditeur de règles** (activer/désactiver/créer/supprimer) avec support des règles communautaires
-- Des **statistiques détaillées** : top IPs, top SIDs, distribution des protocoles et priorités
-- Une **géolocalisation offline** des IPs sources (aucune requête internet)
-- Des **exports TXT/CSV** des alertes filtrées
+OinkView comble ce manque : c'est l'interface de **gestion opérationnelle de Snort 3**, conçue pour l'analyste qui veut agir sur son IDS directement depuis son navigateur.
 
-> Fonctionne entièrement hors-ligne — aucune donnée ne quitte votre réseau.
+```
+Flux de travail typique sans OinkView :
+  Alerte SIEM → SSH sur la sonde → vi local.rules → snort -c -T → SIGHUP
+
+Flux de travail avec OinkView :
+  Alerte → OinkView → modifier/désactiver la règle → copier la commande → terminé
+```
+
+> Fonctionne entièrement **hors-ligne** — aucune donnée ne quitte votre réseau.
+
+---
+
+## Ce qu'OinkView fait que votre SIEM ne fait pas
+
+| Fonctionnalité | SIEM | OinkView |
+|---|:---:|:---:|
+| Visualiser les alertes en temps réel | ✅ | ✅ |
+| Créer une règle Snort 3 | ❌ | ✅ |
+| Activer / désactiver une règle | ❌ | ✅ |
+| Modifier les règles communautaires | ❌ | ✅ |
+| Valider la configuration Snort (`-T`) | ❌ | ✅ |
+| Voir les variables réseau de snort.lua | ❌ | ✅ |
+| Géolocalisation offline des IPs | ➖ | ✅ |
+| Déploiement en 3 commandes | ➖ | ✅ |
+
+---
+
+## Fonctionnalités
+
+### Dashboard — Console alertes temps réel
+- Flux live via WebSocket, nouvelles alertes en haut
+- Filtres : texte, IP, protocole, priorité, action, plage horaire
+- Clic sur une alerte → modal de détail complet
+- Panneau statistiques : graphique d'activité, top SIDs, top IPs géolocalisées
+- Export **TXT / CSV** des alertes filtrées
+
+### Règles — Éditeur complet
+- Liste locale + règles communautaires (lecture seule)
+- Activer / désactiver / supprimer avec confirmation
+- Sélection **bulk** : appliquer une action sur plusieurs règles en un clic
+- **Générateur de règles** Snort 3 : 32 sticky buffers, PCRE, rate limiting, byte ops
+- **Validation** de la configuration (`snort -c snort.lua -T`) avec résultat inline
+- Copier une règle communautaire dans `local.rules` pour la personnaliser
+
+### Vue Globale
+- Parsing de `snort.lua` : variables réseau (`HOME_NET`, `HTTP_PORTS`…), modules actifs, fichiers de règles chargés
+
+### Statistiques
+- Graphique 60 min, camemberts protocoles/priorités
+- Top 10 IPs sources avec géolocalisation offline
+- Top 10 règles déclenchées
+
+### Paramètres
+- Configuration des chemins Snort (règles, log, config, binaire)
+- Commandes Snort générées dynamiquement (démarrer, tester, arrêter, recharger les règles)
+- Authentification par mot de passe (optionnelle)
 
 ---
 
@@ -42,35 +93,14 @@ Ouvrir : **http://localhost:3000**
 
 ---
 
-## Fonctionnalités
+## Pour qui ?
 
-### Dashboard (`/`)
-- Flux en temps réel des alertes Snort via **WebSocket**
-- Filtres : texte, IP, protocole, priorité, action, plage horaire
-- Modal de détail au clic sur une alerte
-- Panneau latéral : graphique d'activité, top SIDs, top IPs avec pays
-- Export **TXT / CSV** des alertes filtrées
-
-### Vue Globale (`/overview.html`)
-- Parsing de `snort.lua` : variables réseau, modules actifs, fichiers de règles inclus
-
-### Règles (`/rules.html`)
-- Liste locale + règles communautaires
-- Activer / désactiver / supprimer (avec confirmation)
-- Sélection **bulk** : activer/désactiver/supprimer plusieurs règles
-- Générateur de règles Snort 3 complet (32 sticky buffers, PCRE, rate limiting…)
-- **Validation** de la configuration Snort (`snort -c snort.lua -T`)
-- Copier une règle communautaire dans `local.rules` avec nouveau SID
-
-### Statistiques (`/stats.html`)
-- Graphique 60 min, camemberts protocoles/priorités
-- Top 10 IPs sources avec géolocalisation offline
-- Top 10 règles déclenchées
-
-### Paramètres (`/settings.html`)
-- Chemins des fichiers Snort (règles, log, config, binaire)
-- Authentification par mot de passe (optionnelle)
-- Commandes Snort générées dynamiquement
+| Profil | Usage |
+|---|---|
+| Analyste SOC avec Snort standalone | Gestion des règles sans SSH, monitoring live |
+| Équipe avec SIEM | Complément pour la gestion opérationnelle de la sonde |
+| Administrateur réseau | Surveillance du trafic, ajustement des règles |
+| Étudiant / formation cybersécurité | Prise en main de Snort 3 sans ligne de commande |
 
 ---
 
@@ -78,7 +108,6 @@ Ouvrir : **http://localhost:3000**
 
 ```
 OinkView/
-├── .env.example           ← Modèle de configuration des chemins Snort
 ├── server.js              ← Backend Express + Socket.io + API REST
 ├── public/
 │   ├── index.html         ← Dashboard
@@ -88,28 +117,11 @@ OinkView/
 │   ├── settings.html      ← Paramètres
 │   └── js/
 ├── config/
-│   └── settings.json      ← Configuration persistante (gitignored)
+│   ├── settings.json      ← Configuration persistante (gitignored)
+│   └── reset_times.json   ← Timestamps de réinitialisation (gitignored)
 ├── Dockerfile
 └── docker-compose.yml
 ```
-
-### API REST
-
-| Méthode | Endpoint | Description |
-|---|---|---|
-| GET | `/api/settings` | Lire la configuration |
-| POST | `/api/settings` | Sauvegarder la configuration |
-| GET | `/api/rules` | Lire `local.rules` |
-| POST | `/api/rules` | Ajouter une règle |
-| PATCH | `/api/rules/:sid/toggle` | Activer/désactiver une règle |
-| DELETE | `/api/rules/:sid` | Supprimer une règle |
-| POST | `/api/rules/bulk` | Actions bulk sur plusieurs SIDs |
-| POST | `/api/rules/validate` | Valider la config Snort |
-| GET | `/api/rules/community` | Règles du dossier communautaire |
-| POST | `/api/reload` | Recharger Snort |
-| GET | `/api/snort/overview` | Vue globale snort.lua |
-| GET | `/api/stats` | Statistiques parsées |
-| POST | `/api/geo/batch` | Géolocalisation offline (geoip-lite) |
 
 ---
 
@@ -119,11 +131,10 @@ OinkView/
 |---|---|
 | Backend | Node.js 20 + Express 4 |
 | Temps réel | Socket.io 4 + Chokidar |
-| Frontend | HTML5 + Tailwind CSS (CDN) |
-| Graphiques | Canvas API + SVG |
+| Frontend | HTML5 + Tailwind CSS |
+| Graphiques | Canvas API |
 | Géolocalisation | geoip-lite (offline, embarqué) |
 | Déploiement | Docker + Docker Compose |
-| Police | JetBrains Mono |
 
 ---
 
@@ -133,4 +144,4 @@ MIT — Utilisation libre, y compris en environnement professionnel.
 
 ---
 
-*OinkView — parce que gérer Snort ne devrait pas être compliqué.*
+*OinkView — parce que gérer Snort ne devrait pas nécessiter un terminal.*
