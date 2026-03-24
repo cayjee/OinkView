@@ -15,10 +15,25 @@ const { exec } = require('child_process');
 const chokidar = require('chokidar');
 const geoip    = require('geoip-lite');
 
-// ─── État global ─────────────────────────────────────────────────────────────
+// ─── État global — reset times persistés dans config/reset_times.json ─────────
 
-let dashResetTime  = 0; // timestamp ms — filtre les lignes du dashboard
-let statsResetTime = 0; // timestamp ms — filtre les stats
+function loadResetTimes() {
+  try {
+    if (fs.existsSync(RESET_FILE)) {
+      const d = JSON.parse(fs.readFileSync(RESET_FILE, 'utf8'));
+      return { dashResetTime: d.dashResetTime || 0, statsResetTime: d.statsResetTime || 0 };
+    }
+  } catch (_) {}
+  return { dashResetTime: 0, statsResetTime: 0 };
+}
+
+function saveResetTimes() {
+  try { fs.writeFileSync(RESET_FILE, JSON.stringify({ dashResetTime, statsResetTime })); } catch (_) {}
+}
+
+const _rt = loadResetTimes();
+let dashResetTime  = _rt.dashResetTime;
+let statsResetTime = _rt.statsResetTime;
 
 // ─── Sessions auth ────────────────────────────────────────────────────────────
 const sessions = new Set(); // tokens actifs en mémoire
@@ -39,8 +54,9 @@ const server = http.createServer(app);
 const io     = new Server(server);
 const PORT   = process.env.PORT || 3000;
 
-const CONFIG_DIR   = path.join(__dirname, 'config');
+const CONFIG_DIR    = path.join(__dirname, 'config');
 const SETTINGS_FILE = path.join(CONFIG_DIR, 'settings.json');
+const RESET_FILE    = path.join(CONFIG_DIR, 'reset_times.json');
 
 // Ensure config directory exists
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -607,11 +623,13 @@ app.post('/api/rules/bulk', (req, res) => {
 
 app.post('/api/reset/dashboard', (_req, res) => {
   dashResetTime = Date.now();
+  saveResetTimes();
   res.json({ success: true, resetTime: dashResetTime });
 });
 
 app.post('/api/reset/stats', (_req, res) => {
   statsResetTime = Date.now();
+  saveResetTimes();
   res.json({ success: true, resetTime: statsResetTime });
 });
 
