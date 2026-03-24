@@ -234,19 +234,6 @@ async function loadLuaRaw() {
   });
 }
 
-// ── Reload Snort ──────────────────────────────────────────────────────────────
-
-document.getElementById('btnReload').addEventListener('click', async () => {
-  const btn = document.getElementById('btnReload');
-  btn.disabled = true;
-  try {
-    const r = await fetch('/api/reload', { method: 'POST' });
-    const d = await r.json();
-    showToast(d.success ? '✔ Snort rechargé' : `✖ ${d.error}`, d.success ? 'ok' : 'err');
-  } catch (e) { showToast(`✖ ${e.message}`, 'err'); }
-  finally { btn.disabled = false; }
-});
-
 document.getElementById('btnRefresh').addEventListener('click', load);
 
 // ── Utilities ─────────────────────────────────────────────────────────────────

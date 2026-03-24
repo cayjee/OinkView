@@ -48,7 +48,6 @@ const ruleRem         = document.getElementById('ruleRem');
 const rulePreview     = document.getElementById('rulePreview');
 const btnSave         = document.getElementById('btnSave');
 const btnRefreshRules = document.getElementById('btnRefreshRules');
-const btnReload       = document.getElementById('btnReload');
 const rulesTbody      = document.getElementById('rulesTbody');
 const searchRules     = document.getElementById('searchRules');
 const rulesCount      = document.getElementById('rulesCount');
@@ -861,17 +860,6 @@ window.deleteRule = async (sid) => {
 
 modalClose.addEventListener('click', () => modal.classList.add('hidden'));
 modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.add('hidden'); });
-
-btnReload.addEventListener('click', async () => {
-  if (!confirm('Recharger Snort maintenant ?')) return;
-  btnReload.disabled = true;
-  try {
-    const r = await fetch('/api/reload', { method: 'POST' });
-    const d = await r.json();
-    showToast(d.success ? 'Snort rechargé' : `Erreur: ${d.error}`, d.success ? 'ok' : 'err');
-  } catch (e) { showToast(`Erreur: ${e.message}`, 'err'); }
-  finally { btnReload.disabled = false; }
-});
 
 // ── Validate (test Snort config) ──────────────────────────────────────────────
 

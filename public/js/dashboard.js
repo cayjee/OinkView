@@ -9,7 +9,6 @@ const liveStatus    = document.getElementById('liveStatus');
 const liveIndicator = document.getElementById('liveIndicator');
 const chkAutoscroll = document.getElementById('chkAutoscroll');
 const btnClear      = document.getElementById('btnClear');
-const btnReload     = document.getElementById('btnReload');
 
 let alertCount = 0;
 let dropCount  = 0;
@@ -444,22 +443,6 @@ btnClear.addEventListener('click', function() {
   document.getElementById('cntDrop').textContent  = '0 drop';
   resetStats();
   renderTopSids(); renderTopIps(); drawChart();
-});
-
-btnReload.addEventListener('click', async function() {
-  if (!confirm('Recharger Snort maintenant ?')) return;
-  btnReload.disabled = true;
-  btnReload.textContent = 'Rechargement…';
-  try {
-    const r    = await fetch('/api/reload', { method: 'POST' });
-    const data = await r.json();
-    showToast(data.success ? 'Snort rechargé' : 'Erreur: ' + data.error, data.success ? 'ok' : 'err');
-  } catch (e) {
-    showToast('Erreur: ' + e.message, 'err');
-  } finally {
-    btnReload.disabled = false;
-    btnReload.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Reload Snort';
-  }
 });
 
 // ── Export ────────────────────────────────────────────────────────────────────

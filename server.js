@@ -49,8 +49,6 @@ const DEFAULT_SETTINGS = {
   rulesFile:          '/etc/snort/rules/local.rules',
   logFile:            '/var/log/snort/alert_fast.txt',
   logFormat:          'fast',
-  reloadCommand:      'systemctl reload snort3',
-  snortPidFile:       '/var/run/snort/snort.pid',
   snortConfig:        '/usr/local/etc/snort/snort.lua',
   communityRulesDir:  '/etc/snort/rules',
   tailLines:          200,
@@ -419,24 +417,6 @@ app.delete('/api/rules/:sid', (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
-});
-
-// ─── API — Snort Reload ───────────────────────────────────────────────────────
-
-app.post('/api/reload', (_req, res) => {
-  const { reloadCommand, snortPidFile } = loadSettings();
-
-  // If a PID file is provided and the command contains 'SIGHUP', use kill approach
-  let cmd = reloadCommand;
-  if (!cmd && snortPidFile && fs.existsSync(snortPidFile)) {
-    const pid = fs.readFileSync(snortPidFile, 'utf8').trim();
-    cmd = `kill -SIGHUP ${pid}`;
-  }
-
-  exec(cmd, { timeout: 10_000 }, (error, stdout, stderr) => {
-    if (error) return res.status(500).json({ error: stderr || error.message, stdout });
-    res.json({ success: true, output: stdout || '(no output)' });
-  });
 });
 
 // ─── API — Snort Config Overview ─────────────────────────────────────────────

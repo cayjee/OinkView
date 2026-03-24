@@ -281,13 +281,5 @@ document.getElementById('btnReset').addEventListener('click', async function() {
   loadStats();
 });
 
-document.getElementById('btnReload').addEventListener('click', async function() {
-  try {
-    var r    = await fetch('/api/reload', { method: 'POST' });
-    var data = await r.json();
-    showToast(data.success ? 'Snort rechargé' : 'Erreur: ' + data.error, data.success ? 'ok' : 'err');
-  } catch (e) { showToast('Erreur: ' + e.message, 'err'); }
-});
-
 // ── Init ───────────────────────────────────────────────────────────────────────
 loadStats();

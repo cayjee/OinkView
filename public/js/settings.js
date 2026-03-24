@@ -6,7 +6,7 @@
 // Champs en lecture seule — affichés mais non modifiables (définis dans .env)
 const readonlyFields = ['rulesFile', 'logFile', 'communityRulesDir', 'snortConfig', 'snortBin'];
 // Champs éditables — sauvegardés dans settings.json
-const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'reloadCommand', 'snortPidFile', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface', 'authEnabled'];
+const fields = ['rulesFile', 'logFile', 'logFormat', 'tailLines', 'snortConfig', 'communityRulesDir', 'snortBin', 'snortInterface', 'authEnabled'];
 
 // ── Load settings on page start ───────────────────────────────────────────────
 
@@ -97,7 +97,6 @@ window.testPath = async (inputId) => {
 function updatePermissions() {
   const rules     = document.getElementById('rulesFile').value     || '/etc/snort/rules/local.rules';
   const log       = document.getElementById('logFile').value       || '/var/log/snort/alert_fast.txt';
-  const reload    = document.getElementById('reloadCommand').value || 'systemctl reload snort3';
   const community = document.getElementById('communityRulesDir').value || '';
 
   // Références inline
@@ -131,7 +130,7 @@ sudo chmod 644 ${log}`;
 }
 
 // Mettre à jour les permissions quand un champ change
-['rulesFile','logFile','reloadCommand','communityRulesDir'].forEach(function(id) {
+['rulesFile','logFile','communityRulesDir'].forEach(function(id) {
   const el = document.getElementById(id);
   if (el) el.addEventListener('input', updatePermissions);
 });
@@ -164,6 +163,15 @@ function updateSnortCommands() {
     'sudo pkill -f snort\n# ou :\nsudo kill $(cat /var/run/snort/snort.pid)'
   );
 
+  set('cmd-reload',
+    '# Rechargement à chaud des règles (envoie SIGHUP à Snort 3)\n' +
+    'sudo kill -SIGHUP $(pidof snort)\n' +
+    '# ou :\n' +
+    'sudo pkill -HUP snort\n' +
+    '# si installé en service systemd :\n' +
+    'sudo systemctl restart snort3'
+  );
+
   set('cmd-tail',
     'tail -f ' + log
   );
@@ -192,22 +200,6 @@ window.copyBlock = (blockId) => {
     showToast('Erreur de copie', 'err');
   });
 };
-
-// ── Reload Snort ──────────────────────────────────────────────────────────────
-
-document.getElementById('btnReload').addEventListener('click', async () => {
-  const btn = document.getElementById('btnReload');
-  btn.disabled = true;
-  try {
-    const r = await fetch('/api/reload', { method: 'POST' });
-    const d = await r.json();
-    showToast(d.success ? '✔ Snort rechargé' : `✖ ${d.error}`, d.success ? 'ok' : 'err');
-  } catch (e) {
-    showToast(`✖ ${e.message}`, 'err');
-  } finally {
-    btn.disabled = false;
-  }
-});
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 
