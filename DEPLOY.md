@@ -20,6 +20,8 @@ cd OinkView
 docker compose up -d
 ```
 
+> **Note :** `docker compose` (avec espace) est la syntaxe **v2** (Docker 20.10+). Si la commande n'est pas reconnue, utilisez l'ancienne syntaxe v1 : `docker-compose up -d` (avec tiret).
+
 L'interface est accessible sur : **http://localhost:3000**
 
 ### Variables d'environnement
@@ -44,7 +46,8 @@ Adapter ces chemins selon votre installation Snort.
 
 ```bash
 # Démarrer
-docker compose up -d
+docker compose up -d          # v2
+docker-compose up -d          # v1 (ancienne install)
 
 # Arrêter
 docker compose down
