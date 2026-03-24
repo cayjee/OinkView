@@ -67,7 +67,7 @@ Au premier lancement, aller dans **Paramètres** et renseigner :
 | Fichier de règles | `/etc/snort/rules/local.rules` | Règles locales (lecture/écriture) |
 | Fichier de log | `/var/log/snort/alert_fast.txt` | Log d'alertes Snort |
 | Config Snort | `/usr/local/etc/snort/snort.lua` | Fichier de configuration principal |
-| Répertoire communautaire | `/usr/local/etc/snort/rules/` | Règles communautaires (lecture seule) |
+| Répertoire communautaire | `/usr/local/etc/snort/rules/` | Dossier contenant les fichiers `.rules` communautaires (lecture seule) — placer les fichiers `.rules` téléchargés directement dans ce dossier |
 | Binaire Snort | `/usr/local/bin/snort` | Chemin vers l'exécutable Snort |
 | Interface réseau | `eth0` | Interface par défaut pour les commandes générées |
 | Commande de reload | `systemctl reload snort3` | Commande pour recharger Snort |
@@ -679,7 +679,7 @@ alert tcp any any -> $HOME_NET $SSH_PORTS ( msg:"SSH Brute Force attempt"; flow:
 | Fichier de règles locales | Fichier `local.rules` — lecture et écriture par OinkView |
 | Fichier de logs | Log d'alertes Snort lu en temps réel |
 | Format du log | `alert_fast` (texte) ou `alert_json` (JSON structuré) |
-| Dossier communautaire | Tous les `.rules` de ce dossier sont chargés en lecture seule |
+| Dossier communautaire | Dossier contenant les fichiers `.rules` communautaires — tous les `.rules` présents dans ce dossier sont chargés en lecture seule dans OinkView |
 | Fichier de configuration | `snort.lua` — utilisé pour la validation et la vue globale |
 | Binaire Snort | Chemin vers l'exécutable `snort` |
 | Interface réseau | Interface utilisée dans les commandes générées |

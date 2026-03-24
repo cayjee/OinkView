@@ -378,8 +378,8 @@ socket.on('log:reset', function(data) {
   const div = document.createElement('div');
   div.className = 'text-yellow-400 italic py-1 border-t border-yellow-600/30';
   div.textContent = '⟳ ' + msg;
-  logConsole.appendChild(div);
-  if (chkAutoscroll.checked) logConsole.scrollTop = logConsole.scrollHeight;
+  logConsole.prepend(div);
+  if (chkAutoscroll.checked) logConsole.scrollTop = 0;
 });
 
 socket.on('log:line', function(line) {
@@ -395,9 +395,10 @@ function appendLine(text, parsed) {
   const placeholder = logConsole.querySelector('.italic');
   if (placeholder) placeholder.remove();
 
-  while (logConsole.querySelectorAll('div[data-raw]').length >= MAX_LINES) {
-    const first = logConsole.querySelector('div[data-raw]');
-    if (first) first.remove();
+  const allLines = logConsole.querySelectorAll('div[data-raw]');
+  if (allLines.length >= MAX_LINES) {
+    const last = allLines[allLines.length - 1];
+    if (last) last.remove();
   }
 
   getFilters();
@@ -409,9 +410,9 @@ function appendLine(text, parsed) {
   div.innerHTML     = highlightLine(text);
   div.style.display = lineMatchesFilters(text, parsed.isoTs) ? '' : 'none';
   div.addEventListener('click', function() { showAlertDetail(parsed); });
-  logConsole.appendChild(div);
+  logConsole.prepend(div);
 
-  if (chkAutoscroll.checked) logConsole.scrollTop = logConsole.scrollHeight;
+  if (chkAutoscroll.checked) logConsole.scrollTop = 0;
 }
 
 function updateCounters(parsed) {
@@ -436,6 +437,7 @@ function resetStats() {
 }
 
 btnClear.addEventListener('click', function() {
+  fetch('/api/reset/dashboard', { method: 'POST' }).catch(function() {});
   logConsole.innerHTML = '<p class="text-gray-600 italic">Console vidée.</p>';
   alertCount = 0; dropCount = 0;
   document.getElementById('cntAlert').textContent = '0 alert';

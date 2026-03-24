@@ -146,7 +146,6 @@ OinkView/
 ├── public/
 │   ├── index.html       ← Dashboard temps réel
 │   ├── rules.html       ← Éditeur de règles Snort 3
-│   ├── pcap.html        ← Test PCAP contre les règles
 │   ├── stats.html       ← Statistiques
 │   ├── overview.html    ← Vue globale
 │   └── settings.html    ← Paramètres

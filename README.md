@@ -18,7 +18,6 @@ OinkView est une interface web légère qui se connecte directement à vos fichi
 - Un **éditeur de règles** (activer/désactiver/créer/supprimer) avec support des règles communautaires
 - Des **statistiques détaillées** : top IPs, top SIDs, distribution des protocoles et priorités
 - Une **géolocalisation offline** des IPs sources (aucune requête internet)
-- Un **test PCAP** pour rejouer des captures réseau contre vos règles
 - Des **exports TXT/CSV** des alertes filtrées
 
 > Fonctionne entièrement hors-ligne — aucune donnée ne quitte votre réseau.
@@ -63,12 +62,6 @@ Ouvrir : **http://localhost:3000**
 - **Validation** de la configuration Snort (`snort -c snort.lua -T`)
 - Copier une règle communautaire dans `local.rules` avec nouveau SID
 
-### Test PCAP (`/pcap.html`)
-- Upload d'un fichier `.pcap` / `.cap` / `.pcapng`
-- Rejoue le trafic via `snort -r` contre vos règles actives
-- Résultat : verdict **DÉTECTÉ / NON DÉTECTÉ**, alertes déclenchées, SIDs distincts
-- Validation obligatoire : catégorie d'attaque + description du test
-
 ### Statistiques (`/stats.html`)
 - Graphique 60 min, camemberts protocoles/priorités
 - Top 10 IPs sources avec géolocalisation offline
@@ -91,7 +84,6 @@ OinkView/
 │   ├── index.html         ← Dashboard
 │   ├── overview.html      ← Vue globale
 │   ├── rules.html         ← Éditeur de règles
-│   ├── pcap.html          ← Test PCAP
 │   ├── stats.html         ← Statistiques
 │   ├── settings.html      ← Paramètres
 │   └── js/
@@ -114,7 +106,6 @@ OinkView/
 | POST | `/api/rules/bulk` | Actions bulk sur plusieurs SIDs |
 | POST | `/api/rules/validate` | Valider la config Snort |
 | GET | `/api/rules/community` | Règles du dossier communautaire |
-| POST | `/api/pcap/test` | Tester un fichier PCAP contre les règles |
 | POST | `/api/reload` | Recharger Snort |
 | GET | `/api/snort/overview` | Vue globale snort.lua |
 | GET | `/api/stats` | Statistiques parsées |

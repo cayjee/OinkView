@@ -591,61 +591,6 @@ app.post('/api/rules/validate', (_req, res) => {
   });
 });
 
-// ─── API — Test PCAP contre les règles Snort ─────────────────────────────────
-
-app.post('/api/pcap/test', (req, res) => {
-  const { snortBin, snortConfig, rulesFile, communityRulesDir } = loadSettings();
-  const { pcapBase64, description, category, rulesSource = 'config' } = req.body;
-
-  if (!pcapBase64)
-    return res.status(400).json({ error: 'Fichier PCAP manquant' });
-  if (!description || !description.trim())
-    return res.status(400).json({ error: 'Description requise' });
-  if (!category)
-    return res.status(400).json({ error: 'Catégorie requise' });
-  if (!snortBin || !snortConfig)
-    return res.status(400).json({ error: 'snortBin et snortConfig non configurés dans Paramètres' });
-
-  const tmpId   = crypto.randomBytes(8).toString('hex');
-  const tmpPcap = `/tmp/oinkview-${tmpId}.pcap`;
-  const tmpLog  = `/tmp/oinkview-log-${tmpId}`;
-
-  try {
-    fs.writeFileSync(tmpPcap, Buffer.from(pcapBase64, 'base64'));
-    fs.mkdirSync(tmpLog, { recursive: true });
-  } catch (e) {
-    return res.status(500).json({ error: `Erreur fichier temporaire : ${e.message}` });
-  }
-
-  // Construire les flags -R selon la source de règles choisie
-  let rulesFlags = '';
-  if (rulesSource === 'local' && rulesFile && fs.existsSync(rulesFile)) {
-    rulesFlags = ` -R ${rulesFile}`;
-  } else if (rulesSource === 'community' && communityRulesDir && fs.existsSync(communityRulesDir)) {
-    const files = fs.readdirSync(communityRulesDir).filter(f => f.endsWith('.rules'));
-    rulesFlags = files.map(f => ` -R ${path.join(communityRulesDir, f)}`).join('');
-  }
-
-  // Forcer alert_fast en console (stdout) — indépendant de la config snort.lua
-  const luaOverride = `--lua "alert_fast = { file = false, packet = false }"`;
-  const cmd = `${snortBin} -r ${tmpPcap} -c ${snortConfig} ${luaOverride}${rulesFlags} 2>&1`;
-  exec(cmd, { timeout: 60000 }, (error, stdout, stderr) => {
-    const output = (stdout + (stderr || '')).trim();
-
-    // Lire les alertes depuis stdout (alert_fast console)
-    const alertLines = output.split('\n').filter(l =>
-      l.includes('[**]') || l.includes('[Priority:')
-    );
-
-    // Nettoyage fichiers temporaires
-    try { fs.unlinkSync(tmpPcap); } catch (_) {}
-    try { fs.rmSync(tmpLog, { recursive: true, force: true }); } catch (_) {}
-
-    const alertCount = alertLines.filter(l => l.includes('[**]')).length;
-    res.json({ success: true, alertCount, alerts: alertLines, output, description, category });
-  });
-});
-
 // ─── API — Opérations bulk sur les règles ─────────────────────────────────────
 
 app.post('/api/rules/bulk', (req, res) => {
