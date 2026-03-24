@@ -20,6 +20,7 @@ COPY public/ ./public/
 RUN apt-get update && apt-get install -y --no-install-recommends \
       libpcap0.8 libpcre2-8-0 libssl3 libhwloc15 libdumbnet1 \
       liblzma5 libunwind8 libluajit-5.1-2 libuuid1 libnuma1 libmnl0 \
+      libgoogle-perftools4 \
       wget \
     && rm -rf /var/lib/apt/lists/*
 
