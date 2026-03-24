@@ -277,8 +277,7 @@ document.getElementById('btnReset').addEventListener('click', async function() {
   document.getElementById('prioLegend').innerHTML  = '';
   var canvas = document.getElementById('timeChart');
   if (canvas) canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-  showToast('Stats réinitialisées — les anciennes données sont masquées', 'ok');
-  loadStats();
+  showToast('Stats réinitialisées. Cliquez Rafraîchir pour voir les nouvelles données.', 'ok');
 });
 
 // ── Init ───────────────────────────────────────────────────────────────────────
