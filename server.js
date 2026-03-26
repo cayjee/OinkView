@@ -54,9 +54,10 @@ const server = http.createServer(app);
 const io     = new Server(server);
 const PORT   = process.env.PORT || 3000;
 
-const CONFIG_DIR    = path.join(__dirname, 'config');
-const SETTINGS_FILE = path.join(CONFIG_DIR, 'settings.json');
-const RESET_FILE    = path.join(CONFIG_DIR, 'reset_times.json');
+const CONFIG_DIR      = path.join(__dirname, 'config');
+const SETTINGS_FILE   = path.join(CONFIG_DIR, 'settings.json');
+const RESET_FILE      = path.join(CONFIG_DIR, 'reset_times.json');
+const MUTED_SIDS_FILE = path.join(CONFIG_DIR, 'muted_sids.json');
 
 // Ensure config directory exists
 if (!fs.existsSync(CONFIG_DIR)) fs.mkdirSync(CONFIG_DIR, { recursive: true });
@@ -94,6 +95,18 @@ function loadSettings() {
 
 function saveSettings(data) {
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2));
+}
+
+function loadMutedSids() {
+  try {
+    if (fs.existsSync(MUTED_SIDS_FILE))
+      return JSON.parse(fs.readFileSync(MUTED_SIDS_FILE, 'utf8'));
+  } catch (_) {}
+  return {};
+}
+
+function saveMutedSids(data) {
+  fs.writeFileSync(MUTED_SIDS_FILE, JSON.stringify(data, null, 2));
 }
 
 /**
@@ -642,6 +655,37 @@ app.post('/api/reset/stats', (_req, res) => {
 
 app.get('/api/reset/times', (_req, res) => {
   res.json({ dashResetTime, statsResetTime });
+});
+
+// ─── API — Bruit masqué (muted GID:SIDs) ─────────────────────────────────────
+
+app.get('/api/muted-sids', (_req, res) => {
+  res.json(loadMutedSids());
+});
+
+app.post('/api/muted-sids', (req, res) => {
+  const { gidSid, label } = req.body;
+  if (!gidSid) return res.status(400).json({ error: 'gidSid requis' });
+  try {
+    const data = loadMutedSids();
+    data[gidSid] = label || gidSid;
+    saveMutedSids(data);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.delete('/api/muted-sids/:gidSid', (req, res) => {
+  const gidSid = decodeURIComponent(req.params.gidSid);
+  try {
+    const data = loadMutedSids();
+    delete data[gidSid];
+    saveMutedSids(data);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ─── API — Statistiques log ───────────────────────────────────────────────────

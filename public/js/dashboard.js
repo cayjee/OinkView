@@ -299,7 +299,16 @@ function lineMatchesFilters(text, isoTs) {
 function applyFilters() {
   getFilters();
   logConsole.querySelectorAll('div[data-raw]').forEach(function(div) {
-    div.style.display = lineMatchesFilters(div.dataset.raw, div.dataset.ts) ? '' : 'none';
+    const gs      = div.dataset.gidsid;
+    const muted   = gs && mutedSids[gs] !== undefined;
+    if (muted && !showMuted) {
+      div.style.display = 'none';
+      div.classList.remove('muted-alert');
+      return;
+    }
+    const visible = lineMatchesFilters(div.dataset.raw, div.dataset.ts);
+    div.style.display = visible ? '' : 'none';
+    div.classList.toggle('muted-alert', muted && visible);
   });
 }
 
@@ -329,6 +338,89 @@ document.getElementById('btnToggleStats').addEventListener('click', function() {
   btn.textContent = panel.classList.contains('hidden') ? '▶ Stats' : '◀ Stats';
 });
 
+// ── Noise filter — GID:SID mute list ─────────────────────────────────────────
+
+let mutedSids = {};  // { "116:444": "IPv4 option set", ... }
+let showMuted = false;
+
+async function loadMutedSids() {
+  try {
+    const r = await fetch('/api/muted-sids');
+    mutedSids = await r.json();
+    renderMutedList();
+    updateMutedCounter();
+  } catch (_) {}
+}
+
+async function muteGidSid(gidSid, label) {
+  try {
+    await fetch('/api/muted-sids', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ gidSid, label })
+    });
+    mutedSids[gidSid] = label || gidSid;
+    applyFilters();
+    renderMutedList();
+    updateMutedCounter();
+    showToast('🔇 ' + gidSid + ' masqué', 'ok');
+  } catch (e) { showToast('Erreur: ' + e.message, 'err'); }
+}
+
+window.unmuteGidSid = async function(gidSid) {
+  try {
+    await fetch('/api/muted-sids/' + encodeURIComponent(gidSid), { method: 'DELETE' });
+    delete mutedSids[gidSid];
+    applyFilters();
+    renderMutedList();
+    updateMutedCounter();
+    showToast('🔔 ' + gidSid + ' réactivé', 'ok');
+  } catch (e) { showToast('Erreur: ' + e.message, 'err'); }
+};
+
+function renderMutedList() {
+  const el = document.getElementById('mutedList');
+  if (!el) return;
+  const entries = Object.entries(mutedSids);
+  if (!entries.length) {
+    el.innerHTML = '<p class="text-gray-600 text-xs px-3 py-1">Aucun filtre actif</p>';
+    return;
+  }
+  el.innerHTML = entries.map(function(entry) {
+    const gidSid = entry[0], label = entry[1];
+    const safeGs  = gidSid.replace(/'/g, "\\'");
+    const safeL   = String(label).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<div class="flex items-center gap-1 px-3 py-1.5 border-b border-gray-800/50 last:border-0">' +
+      '<span class="font-mono text-orange-400/60 text-xs w-14 shrink-0">' + gidSid + '</span>' +
+      '<span class="text-gray-500 text-xs truncate flex-1" title="' + safeL + '">' + safeL + '</span>' +
+      '<button onclick="unmuteGidSid(\'' + safeGs + '\')" ' +
+              'class="text-gray-600 hover:text-red-400 text-xs shrink-0 px-1" title="Réactiver">✕</button>' +
+      '</div>';
+  }).join('');
+}
+
+function updateMutedCounter() {
+  const btn = document.getElementById('btnToggleMuted');
+  if (!btn) return;
+  const n = Object.keys(mutedSids).length;
+  if (showMuted) {
+    btn.textContent = '🔔 Afficher tout';
+    btn.className = btn.className.replace('bg-yellow-900/50','bg-gray-800') || btn.className;
+  } else {
+    btn.textContent = n ? '🔇 Bruit (' + n + ')' : '🔇 Bruit';
+  }
+  btn.classList.toggle('bg-yellow-900/50', n > 0 && !showMuted);
+  btn.classList.toggle('text-yellow-300',  n > 0 && !showMuted);
+  btn.classList.toggle('bg-gray-800',      n === 0 || showMuted);
+  btn.classList.toggle('text-gray-300',    n === 0 || showMuted);
+}
+
+document.getElementById('btnToggleMuted').addEventListener('click', function() {
+  showMuted = !showMuted;
+  applyFilters();
+  updateMutedCounter();
+});
+
 // ── Alert detail modal ────────────────────────────────────────────────────────
 
 const alertModal      = document.getElementById('alertModal');
@@ -352,6 +444,33 @@ function showAlertDetail(parsed) {
     '<span class="text-gray-100 font-mono break-all">' + String(v).replace(/</g,'&lt;') + '</span></div>'
   ).join('');
   document.getElementById('alertModalRaw').textContent = parsed.raw;
+
+  // Mute button
+  const gidSid     = (parsed.gid && parsed.sid) ? parsed.gid + ':' + parsed.sid : null;
+  const actionsEl  = document.getElementById('alertModalActions');
+  if (actionsEl) {
+    if (gidSid) {
+      const alreadyMuted = mutedSids[gidSid] !== undefined;
+      const btn = document.createElement('button');
+      btn.className   = 'px-3 py-1.5 rounded text-xs transition-colors ' +
+        (alreadyMuted
+          ? 'bg-yellow-900/40 hover:bg-yellow-800 text-yellow-300'
+          : 'bg-gray-700 hover:bg-gray-600 text-gray-300');
+      btn.textContent = alreadyMuted
+        ? '🔔 Réactiver [' + gidSid + ']'
+        : '🔇 Masquer ce type [' + gidSid + ']';
+      btn.addEventListener('click', function() {
+        alertModal.classList.add('hidden');
+        if (alreadyMuted) unmuteGidSid(gidSid);
+        else muteGidSid(gidSid, parsed.msg || gidSid);
+      });
+      actionsEl.innerHTML = '';
+      actionsEl.appendChild(btn);
+    } else {
+      actionsEl.innerHTML = '';
+    }
+  }
+
   alertModal.classList.remove('hidden');
 }
 
@@ -401,13 +520,23 @@ function appendLine(text, parsed) {
   }
 
   getFilters();
-  const cls = parsed.action === 'drop' ? 'log-drop' : parsed.action === 'alert' ? 'log-alert' : 'log-info';
-  const div = document.createElement('div');
-  div.className     = cls + ' cursor-pointer hover:bg-white/5 rounded px-1';
-  div.dataset.raw   = text;
+  const gidSid  = (parsed.gid && parsed.sid) ? parsed.gid + ':' + parsed.sid : '';
+  const muted   = gidSid && mutedSids[gidSid] !== undefined;
+  const cls     = parsed.action === 'drop' ? 'log-drop' : parsed.action === 'alert' ? 'log-alert' : 'log-info';
+  const div     = document.createElement('div');
+  div.className        = cls + ' cursor-pointer hover:bg-white/5 rounded px-1';
+  div.dataset.raw      = text;
+  div.dataset.gidsid   = gidSid;
   if (parsed.isoTs) div.dataset.ts = parsed.isoTs;
-  div.innerHTML     = highlightLine(text);
-  div.style.display = lineMatchesFilters(text, parsed.isoTs) ? '' : 'none';
+  div.innerHTML        = highlightLine(text);
+
+  if (muted && !showMuted) {
+    div.style.display = 'none';
+  } else {
+    div.style.display = lineMatchesFilters(text, parsed.isoTs) ? '' : 'none';
+    if (muted) div.classList.add('muted-alert');
+  }
+
   div.addEventListener('click', function() { showAlertDetail(parsed); });
   logConsole.prepend(div);
 
@@ -511,3 +640,4 @@ document.getElementById('btnResetAll').addEventListener('click', async function(
 drawChart();
 renderTopSids();
 renderTopIps();
+loadMutedSids();
