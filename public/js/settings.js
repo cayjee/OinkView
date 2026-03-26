@@ -163,6 +163,14 @@ function updateSnortCommands() {
     'sudo pkill -f snort\n# ou :\nsudo kill $(cat /var/run/snort/snort.pid)'
   );
 
+  set('cmd-pkill',
+    'sudo pkill snort'
+  );
+
+  set('cmd-pidof',
+    'pidof snort'
+  );
+
   set('cmd-reload',
     '# Rechargement à chaud des règles (envoie SIGHUP à Snort 3)\n' +
     'sudo kill -SIGHUP $(pidof snort)\n' +
