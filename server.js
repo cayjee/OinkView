@@ -245,6 +245,10 @@ app.get('/api/rules/community', (_req, res) => {
     if (!fs.existsSync(communityRulesDir))
       return res.status(404).json({ rules: [], files: [], error: 'Dossier introuvable' });
 
+    // Charger les msgs des règles locales pour détecter les copies
+    const localContent = fs.existsSync(rulesFile) ? fs.readFileSync(rulesFile, 'utf8') : '';
+    const localMsgs    = new Set(parseRules(localContent).map(r => r.msg));
+
     // Lister tous les .rules du dossier (non récursif)
     const files = fs.readdirSync(communityRulesDir)
       .filter(f => f.endsWith('.rules'))
@@ -258,7 +262,8 @@ app.get('/api/rules/community', (_req, res) => {
       try {
         const content = fs.readFileSync(filePath, 'utf8');
         const rules   = parseRules(content).map(r => ({
-          ...r, source: 'community', editable: false, filePath: file
+          ...r, source: 'community', editable: false, filePath: file,
+          inLocal: localMsgs.has(r.msg)
         }));
         fileStats.push({ file, count: rules.length });
         allRules = allRules.concat(rules);
@@ -424,11 +429,13 @@ app.delete('/api/rules/:sid', (req, res) => {
   const { sid } = req.params;
   try {
     const content = fs.readFileSync(rulesFile, 'utf8');
-    const lines = content.split('\n').filter(line => {
-      // Remove any line (even commented) that contains this SID
-      return !line.match(new RegExp(`\\bsid\\s*:\\s*${sid}\\s*;`));
-    });
-    fs.writeFileSync(rulesFile, lines.join('\n'));
+    const re = new RegExp(`\\bsid\\s*:\\s*${sid}\\s*;`);
+    const lines = content.split('\n');
+    const filtered = lines.filter(line => !line.match(re));
+    if (filtered.length === lines.length) {
+      return res.status(404).json({ success: false, error: `SID ${sid} introuvable dans local.rules` });
+    }
+    fs.writeFileSync(rulesFile, filtered.join('\n'));
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
@@ -613,7 +620,7 @@ app.post('/api/rules/bulk', (req, res) => {
       });
     }
     fs.writeFileSync(rulesFile, content);
-    res.json({ success: true, count: sids.length });
+    res.json({ success: true, affected: sids.length });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

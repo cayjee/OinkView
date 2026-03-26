@@ -507,7 +507,7 @@ const ACTION_COLORS = {
 
 function renderRules(rules) {
   if (!rules.length) {
-    rulesTbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-600 text-xs">Aucune règle trouvée.</td></tr>';
+    rulesTbody.innerHTML = '<tr><td colspan="8" class="px-4 py-8 text-center text-gray-600 text-xs">Aucune règle trouvée.</td></tr>';
     return;
   }
 
@@ -522,6 +522,12 @@ function renderRules(rules) {
       ? '<span class="px-1.5 py-0.5 rounded bg-blue-900/40 text-blue-300">locale</span>'
       : `<span class="px-1.5 py-0.5 rounded bg-purple-900/40 text-purple-300 truncate max-w-[80px] inline-block" title="${escHtml(rule.filePath || '')}">${escHtml(rule.filePath ? rule.filePath.split('/').pop() : 'communauté')}</span>`;
 
+    const inLocalCell = !isLocal
+      ? (rule.inLocal
+          ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-green-900/60 text-green-400 text-xs font-bold" title="Copiée dans local.rules">✓</span>'
+          : '<span class="text-gray-700 text-xs" title="Pas encore dans local.rules">○</span>')
+      : '<span class="text-gray-800 text-xs">—</span>';
+
     return `
       <tr class="hover:bg-gray-900/50 transition-colors ${opacity}" data-sid="${rule.sid || ''}">
         <td class="px-3 py-2.5">
@@ -531,6 +537,7 @@ function renderRules(rules) {
         <td class="px-4 py-2.5 text-orange-300 text-xs">${sidText}</td>
         <td class="px-4 py-2.5 text-gray-300 text-xs max-w-xs truncate" title="${escHtml(rule.msg)}">${escHtml(rule.msg)}</td>
         <td class="px-4 py-2.5 text-xs">${sourceBadge}</td>
+        <td class="px-4 py-2.5 text-center">${inLocalCell}</td>
         <td class="px-4 py-2.5 text-xs">
           ${rule.disabled
             ? '<span class="px-1.5 py-0.5 rounded bg-gray-800 text-gray-500">désactivée</span>'
