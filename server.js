@@ -413,6 +413,30 @@ app.post('/api/rules', (req, res) => {
   }
 });
 
+// Update a rule in place by SID (preserve disabled state)
+app.put('/api/rules/:sid', (req, res) => {
+  const { rulesFile } = loadSettings();
+  const { sid } = req.params;
+  const { rule } = req.body;
+  if (!rule || typeof rule !== 'string')
+    return res.status(400).json({ error: 'Missing rule string' });
+  try {
+    const content = fs.readFileSync(rulesFile, 'utf8');
+    const re = new RegExp(`(^|\\n)(#?\\s*(?:alert|drop|pass|reject|rewrite)[^\\n]*\\bsid\\s*:\\s*${sid}\\s*;[^\\n]*)`, 'g');
+    let found = false;
+    const updated = content.replace(re, (_full, pre, line) => {
+      found = true;
+      const wasDisabled = line.trimStart().startsWith('#');
+      return pre + (wasDisabled ? '# ' + rule : rule);
+    });
+    if (!found) return res.status(404).json({ success: false, error: `SID ${sid} introuvable dans local.rules` });
+    fs.writeFileSync(rulesFile, updated);
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Toggle rule enabled/disabled (comment/uncomment)
 app.patch('/api/rules/:sid/toggle', (req, res) => {
   const { rulesFile } = loadSettings();

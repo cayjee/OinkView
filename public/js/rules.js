@@ -61,6 +61,7 @@ let allRules       = [];
 let communityRules = [];
 let mergedRules    = [];
 let contentEntries = []; // [{id, buffer, content, nocase, fastPattern, offset, depth, distance, within}]
+let editingSid     = null; // null = nouvelle règle, string = édition en place (SID d'origine)
 
 // ── Sticky buffer list ────────────────────────────────────────────────────────
 
@@ -384,19 +385,41 @@ btnSave.addEventListener('click', async () => {
 
   btnSave.disabled = true;
   try {
-    const r = await fetch('/api/rules', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ rule })
-    });
-    const data = await r.json();
-    if (data.success) {
-      showToast('Règle ajoutée dans local.rules', 'ok');
-      await fetchNextSid();
-      updatePreview();
-      await loadRules();
+    if (editingSid) {
+      // Mise à jour en place
+      const r = await fetch(`/api/rules/${editingSid}`, {
+        method:  'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ rule })
+      });
+      const data = await r.json();
+      if (data.success) {
+        showToast('Règle mise à jour', 'ok');
+        editingSid = null;
+        btnSave.textContent = 'Sauvegarder';
+        btnSave.classList.remove('ring-2', 'ring-yellow-500');
+        await fetchNextSid();
+        updatePreview();
+        await loadRules();
+      } else {
+        showToast(`Erreur: ${data.error}`, 'err');
+      }
     } else {
-      showToast(`Erreur: ${data.error}`, 'err');
+      // Nouvelle règle
+      const r = await fetch('/api/rules', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ rule })
+      });
+      const data = await r.json();
+      if (data.success) {
+        showToast('Règle ajoutée dans local.rules', 'ok');
+        await fetchNextSid();
+        updatePreview();
+        await loadRules();
+      } else {
+        showToast(`Erreur: ${data.error}`, 'err');
+      }
     }
   } catch (e) {
     showToast(`Erreur: ${e.message}`, 'err');
@@ -544,7 +567,7 @@ function renderRules(rules) {
             : '<span class="px-1.5 py-0.5 rounded bg-green-900/40 text-green-400">active</span>'}
         </td>
         <td class="px-4 py-2.5 text-right space-x-1">
-          <button onclick="loadIntoBuilder('${rawEncoded}')" title="Charger dans l'éditeur"
+          <button onclick="loadIntoBuilder('${rawEncoded}', '${rule.sid}', ${isLocal})" title="${isLocal ? 'Éditer (mise à jour en place)' : 'Charger dans l\'éditeur'}"
                   class="px-2 py-1 rounded bg-orange-900/40 hover:bg-orange-800 text-orange-300 text-xs transition-colors">✎</button>
           <button onclick="showRaw('${rule.sid}')" title="Voir la règle brute"
                   class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs transition-colors">⊞</button>
@@ -583,7 +606,7 @@ window.showRaw = (sid) => {
 /**
  * Parse une règle brute Snort 3 et remplit tous les champs du formulaire.
  */
-window.loadIntoBuilder = async (rawEncoded) => {
+window.loadIntoBuilder = async (rawEncoded, originalSid = null, isLocal = false) => {
   const raw = decodeURIComponent(rawEncoded).trim().replace(/^#\s*/, '');
 
   // ── 1. Header ────────────────────────────────────────────────────────────────
@@ -819,12 +842,22 @@ window.loadIntoBuilder = async (rawEncoded) => {
   const remM = opts.match(/\brem\s*:\s*"((?:[^"\\]|\\.)*)"/);
   ruleRem.value = remM ? remM[1] : '';
 
-  // ── 4. New SID ───────────────────────────────────────────────────────────────
-  await fetchNextSid();
+  // ── 4. SID — édition en place ou nouvelle règle ──────────────────────────────
+  if (isLocal && originalSid) {
+    editingSid = originalSid;
+    ruleSid.value = originalSid;
+    btnSave.textContent = `Mettre à jour SID ${originalSid}`;
+    btnSave.classList.add('ring-2', 'ring-yellow-500');
+  } else {
+    editingSid = null;
+    btnSave.textContent = 'Sauvegarder';
+    btnSave.classList.remove('ring-2', 'ring-yellow-500');
+    await fetchNextSid();
+  }
 
   updatePreview();
   document.querySelector('section').scrollTo({ top: 0, behavior: 'smooth' });
-  showToast('Règle chargée dans l\'éditeur', 'ok');
+  showToast(isLocal && originalSid ? `Règle SID ${originalSid} chargée pour édition` : 'Règle chargée dans l\'éditeur', 'ok');
 };
 
 window.copyToLocal = async (rawEncoded) => {
