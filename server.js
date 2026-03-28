@@ -666,13 +666,17 @@ app.post('/api/rules/bulk', (req, res) => {
 // ─── API — Reset dashboard / stats ───────────────────────────────────────────
 
 app.post('/api/reset/dashboard', (_req, res) => {
-  dashResetTime = Date.now();
+  const now = Date.now();
+  dashResetTime = now - (now % 60000);
   saveResetTimes();
   res.json({ success: true, resetTime: dashResetTime });
 });
 
 app.post('/api/reset/stats', (_req, res) => {
-  statsResetTime = Date.now();
+  // Arrondir à la minute basse pour aligner avec la précision de parseSnortTs
+  // (Snort timestamps = MM/DD-HH:MM sans secondes)
+  const now = Date.now();
+  statsResetTime = now - (now % 60000);
   saveResetTimes();
   res.json({ success: true, resetTime: statsResetTime });
 });
